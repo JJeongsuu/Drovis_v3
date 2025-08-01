@@ -2,6 +2,9 @@ import os
 import sys
 import json
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> silver
 from datetime import datetime
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
@@ -10,6 +13,7 @@ from PyQt5.QtWidgets import (
 )
 from gui.history_window import HistoryWindow
 from core.services.predict import predict_from_video
+<<<<<<< HEAD
 =======
 
 
@@ -21,6 +25,9 @@ os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = plugin_path
 
 >>>>>>> origin/main
 
+=======
+
+>>>>>>> silver
 # 경로 설정
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = r"C:\경로\plugins\platforms"
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
