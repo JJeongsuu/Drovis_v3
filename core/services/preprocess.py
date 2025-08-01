@@ -30,10 +30,10 @@ def process_pose(video_path, seq_len=90, detected_points=33):
             landmarks = results.pose_landmarks.landmark
             coords = []
             for lm in landmarks:
-                coords.extend([lm.x, lm.y, lm.z, lm.visibility])
+                coords.extend([lm.x, lm.y])
             frames.append(coords)
         else:
-            frames.append([0] * detected_points * 4)
+            frames.append([0] * detected_points * 2)
     cap.release()
     pose.close()
 
@@ -41,7 +41,7 @@ def process_pose(video_path, seq_len=90, detected_points=33):
     
     # 프레임 개수 부족 시 패딩 / 많으면 자르기
     if len(frames) < seq_len:
-        pad = np.zeros((seq_len - len(frames), detected_points * 4))
+        pad = np.zeros((seq_len - len(frames), detected_points * 2))
         frames = np.vstack([frames, pad])
     else:
         frames = frames[:seq_len]
