@@ -44,6 +44,7 @@ class RegisterWindow(QWidget):
         self.pw2_input = QLineEdit()
         self.pw2_input.setPlaceholderText("비밀번호 다시 입력")
         self.pw2_input.setEchoMode(QLineEdit.Password)
+        self.pw2_input.returnPressed.connect(self.handle_register)
         layout.addWidget(QLabel("비밀번호 확인"))
         layout.addWidget(self.pw2_input)
 
