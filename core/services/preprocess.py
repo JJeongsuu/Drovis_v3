@@ -38,6 +38,7 @@ def process_pose(video_path, seq_len=90, detected_points=33):
     pose.close()
 
     frames = np.array(frames)
+    
     # 프레임 개수 부족 시 패딩 / 많으면 자르기
     if len(frames) < seq_len:
         pad = np.zeros((seq_len - len(frames), detected_points * 2))
