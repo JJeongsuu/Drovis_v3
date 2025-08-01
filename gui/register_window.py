@@ -68,7 +68,7 @@ class RegisterWindow(QWidget):
         pw1 = self.pw_input.text()
         pw2 = self.pw2_input.text()
         # role_map = {"일반 사용자": "user", "경찰": "police", "관리자": "admin"} 
-        role = role_map.get(self.role_box.currentText(), "user")
+        # role = role_map.get(self.role_box.currentText(), "user")
 
         if not username or not email or not pw1 or not pw2:
             QMessageBox.warning(self, "입력 오류", "모든 항목을 입력해주세요.")
@@ -79,7 +79,7 @@ class RegisterWindow(QWidget):
             return
 
         # 회원가입 시도 (register_user 내부에서 bcrypt 해시 처리 및 중복 검사)
-        success, message = register_user(username, pw1, email, role)
+        success, message = register_user(username, pw1, email)
         if success:
             QMessageBox.information(
                 self, "가입 완료", f"{username}님, 가입을 환영합니다!"
