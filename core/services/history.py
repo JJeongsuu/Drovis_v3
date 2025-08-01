@@ -3,6 +3,7 @@ from core.config import Config
 
 DB_PATH = Config.ANALYSIS_DB_PATH  # 예: ./database/analysis.db
 
+
 def get_history(user_id: str):
     """
     특정 사용자의 분석 기록 전체를 최신순으로 조회.
@@ -14,13 +15,14 @@ def get_history(user_id: str):
         cur = conn.cursor()
         cur.execute(
             "SELECT * FROM analysis WHERE user_id = ? ORDER BY uploaded_at DESC",
-            (user_id,)
+            (user_id,),
         )
         rows = cur.fetchall()
         # dict list로 리턴
         return [dict(row) for row in rows]
     finally:
         conn.close()
+
 
 def update_memo(record_id: int, user_id: str, memo: str):
     """
@@ -31,18 +33,21 @@ def update_memo(record_id: int, user_id: str, memo: str):
     try:
         cur = conn.cursor()
         # 기록 존재/권한 확인
-        cur.execute("SELECT * FROM analysis WHERE id = ? AND user_id = ?", (record_id, user_id))
+        cur.execute(
+            "SELECT * FROM analysis WHERE id = ? AND user_id = ?", (record_id, user_id)
+        )
         if cur.fetchone() is None:
             return False  # Not found or not owner
 
         cur.execute(
             "UPDATE analysis SET memo = ? WHERE id = ? AND user_id = ?",
-            (memo, record_id, user_id)
+            (memo, record_id, user_id),
         )
         conn.commit()
         return True
     finally:
         conn.close()
+
 
 def delete_history(record_id: int, user_id: str):
     """
@@ -53,12 +58,15 @@ def delete_history(record_id: int, user_id: str):
     try:
         cur = conn.cursor()
         # 기록 존재/권한 확인
-        cur.execute("SELECT * FROM analysis WHERE id = ? AND user_id = ?", (record_id, user_id))
+        cur.execute(
+            "SELECT * FROM analysis WHERE id = ? AND user_id = ?", (record_id, user_id)
+        )
         if cur.fetchone() is None:
             return False
-        cur.execute("DELETE FROM analysis WHERE id = ? AND user_id = ?", (record_id, user_id))
+        cur.execute(
+            "DELETE FROM analysis WHERE id = ? AND user_id = ?", (record_id, user_id)
+        )
         conn.commit()
         return True
     finally:
         conn.close()
-
