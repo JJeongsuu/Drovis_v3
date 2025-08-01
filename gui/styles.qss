@@ -12,9 +12,10 @@ QPushButton {
                                       stop:0 #eaf1ff, stop:1 #cae0fc);
     color: #274d79;
     border-radius: 7px;
-    padding: 8px 20px;
+    padding: 10px 0;  /* 상하 여백만 적용 */
     font-weight: bold;
     border: 1.5px solid #b6cbdd;
+    min-width: 150px;  /* 👈 버튼 넓이 통일 */
 }
 QPushButton:hover {
     background-color: #daeaff;
@@ -41,9 +42,10 @@ QLineEdit:focus, QPlainTextEdit:focus, QTextEdit:focus {
 /* 라벨 */
 QLabel {
     color: #25415b;
-    font-size: 20px;
+    font-size: 15px;  /* 👈 더 자연스러운 크기 */
     font-weight: bold;
 }
+
 
 /* 테이블 */
 QTableView {
