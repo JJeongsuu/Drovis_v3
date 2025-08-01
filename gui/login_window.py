@@ -1,22 +1,22 @@
 import os
 import sys
 
-# ✅ PyQt5 플랫폼 플러그인 경로 설정 (자동 방식 권장)
+# PyQt5 플랫폼 플러그인 경로 설정 (자동 방식 권장)
 from PyQt5 import QtCore  # QtCore 위치 기준으로 plugins 경로 자동 지정
 
 plugin_path = os.path.join(os.path.dirname(QtCore.__file__), "plugins", "platforms")
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = plugin_path
 
-# ✅ import 경로 처리 (상위 폴더를 sys.path에 추가)
+# import 경로 처리 (상위 폴더를 sys.path에 추가)
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
 sys.path.append(PARENT_DIR)
 
-# ✅ 외부 모듈 import
+# 외부 모듈 import
 from gui.upload_window import UploadWindow
 from core.services.auth import verify_user
 
-# ✅ PyQt5 위젯 모듈들
+# PyQt5 위젯 모듈들
 from PyQt5.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -27,8 +27,12 @@ from PyQt5.QtWidgets import (
     QApplication,
 )
 
+<<<<<<< HEAD
 
 # ✅ 로그인 창 클래스
+=======
+# 로그인 창 클래스
+>>>>>>> origin/main
 class LoginWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -75,7 +79,7 @@ class LoginWindow(QMainWindow):
             )
 
 
-# ✅ 실행 진입점
+# 실행 진입점
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     login = LoginWindow()
