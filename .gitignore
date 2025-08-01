@@ -6,3 +6,4 @@ __pycache__/
 .vscode/
 database/*.db
 # uploads 추후 추가
+venv310/
