@@ -1,8 +1,8 @@
 # app.py
 import sys, os
 from PyQt5.QtWidgets import QApplication
-from gui.login_window import LoginWindow
-from core.models import create_user_table, create_analysis_table  # 간결하게 import 가능
+from core.models import create_user_table, create_analysis_table
+from gui.main_window import MainWindow, load_stylesheet
 
 # DB 폴더 자동 생성
 if not os.path.exists("database"):
@@ -13,7 +13,9 @@ create_user_table()
 create_analysis_table()
 
 # 앱 실행
-app = QApplication(sys.argv)
-login = LoginWindow()
-login.show()
-sys.exit(app.exec_())
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    app.setStyleSheet(load_stylesheet())  # 스타일시트 적용
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())
