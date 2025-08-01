@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import mediapipe as mp
 
+
 def process_pose(video_path, seq_len=90, detected_points=33):
     """
     입력 받은 영상 파일에서 Pose 정보 추출하여
@@ -45,6 +46,7 @@ def process_pose(video_path, seq_len=90, detected_points=33):
         frames = frames[:seq_len]
 
     return frames
+
 
 # 사용 예: (PyQt5에서 영상 경로를 받아 넘겼을 때)
 # arr = process_pose("/path/to/user_uploaded.mov")
