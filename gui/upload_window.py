@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+<<<<<<< HEAD
 from datetime import datetime
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
@@ -9,6 +10,16 @@ from PyQt5.QtWidgets import (
 )
 from gui.history_window import HistoryWindow
 from core.services.predict import predict_from_video
+=======
+
+
+# Qt 플랫폼 환경변수
+from PyQt5 import QtCore
+
+plugin_path = os.path.join(os.path.dirname(QtCore.__file__), "plugins", "platforms")
+os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = plugin_path
+
+>>>>>>> origin/main
 
 # 경로 설정
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = r"C:\경로\plugins\platforms"
