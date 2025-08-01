@@ -4,9 +4,11 @@ import json
 
 
 # Qt 플랫폼 환경변수
-os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = (
-    r"C:\Users\김민경\OneDrive\바탕 화면\Proj_drovis\Drovis_v2-main\venv\Lib\site-packages\PyQt5\Qt5\plugins\platforms"
-)
+from PyQt5 import QtCore
+
+plugin_path = os.path.join(os.path.dirname(QtCore.__file__), "plugins", "platforms")
+os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = plugin_path
+
 
 # 현재 경로 기반으로 상위 폴더 추가
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
