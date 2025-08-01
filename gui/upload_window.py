@@ -3,9 +3,16 @@ import sys
 import json
 from datetime import datetime
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QFileDialog, QTableWidget,
-    QTableWidgetItem, QMessageBox
+    QApplication,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QLabel,
+    QFileDialog,
+    QTableWidget,
+    QTableWidgetItem,
+    QMessageBox,
 )
 from gui.history_window import HistoryWindow
 from core.services.predict import predict_from_video
@@ -52,7 +59,9 @@ class UploadWindow(QWidget):
         # 결과 테이블
         self.result_table = QTableWidget()
         self.result_table.setColumnCount(4)
-        self.result_table.setHorizontalHeaderLabels(["파일명", "상태", "유사도 결과", "시간"])
+        self.result_table.setHorizontalHeaderLabels(
+            ["파일명", "상태", "유사도 결과", "시간"]
+        )
         self.result_table.setSortingEnabled(True)
         layout.addWidget(self.result_table)
 
@@ -95,7 +104,7 @@ class UploadWindow(QWidget):
             "result": result,
             "confidence": None,  # 추후 confidence 추가 시 여기에
             "timestamp": timestamp,
-            "description": "AI 자동 분석 결과"
+            "description": "AI 자동 분석 결과",
         }
 
         history_file = "data/history.json"
@@ -118,6 +127,7 @@ class UploadWindow(QWidget):
         self.history_window.show()
 
 
+# 주석
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
