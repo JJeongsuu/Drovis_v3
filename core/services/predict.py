@@ -8,7 +8,7 @@ from core.services.preprocess import process_pose
 from core.config import Config
 from core.models.lstm_model import LSTMModel
 
-LABELS = ["상", "중", "하"]
+LABELS = ["상", "중", "하", "기타"]
 MODEL_PATH = os.path.join(Config.MODEL_FOLDER, "lstm_model.pt")
 UPLOAD_FOLDER = Config.UPLOAD_FOLDER
 
