@@ -1,12 +1,19 @@
 import os
 import sys
 
+<<<<<<< HEAD
+from torch import layout
+
+# Qt 플랫폼 플러그인 경로 명시 (OneDrive + PyQt5 Qt5 구조)
+os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = r"C:\Users\김민경\OneDrive\바탕 화면\Proj_drovis\Drovis_v2-main\venv\Lib\site-packages\PyQt5\Qt5\plugins\platforms"
+=======
 # Qt 플랫폼 플러그인 경로 명시
 from PyQt5 import QtCore  # QtCore 위치 기준으로 plugins 경로를 자동 지정
 
 plugin_path = os.path.join(os.path.dirname(QtCore.__file__), "plugins", "platforms")
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = plugin_path
 
+>>>>>>> origin/main
 
 # import 경로 처리 (상위 폴더를 sys.path에 추가)
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -43,11 +50,13 @@ class LoginWindow(QMainWindow):
 
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("아이디")
+        self.username_input.returnPressed.connect(self.try_login)
         layout.addWidget(self.username_input)
 
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("비밀번호")
         self.password_input.setEchoMode(QLineEdit.Password)
+        self.password_input.returnPressed.connect(self.try_login)  # ✅ Enter 키 연결
         layout.addWidget(self.password_input)
 
         self.login_button = QPushButton("로그인")

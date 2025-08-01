@@ -1,6 +1,16 @@
 import os
 import sys
 import json
+<<<<<<< HEAD
+from datetime import datetime
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout,
+    QPushButton, QLabel, QFileDialog, QTableWidget,
+    QTableWidgetItem, QMessageBox
+)
+from gui.history_window import HistoryWindow
+from core.services.predict import predict_from_video
+=======
 
 
 # Qt 플랫폼 환경변수
@@ -9,30 +19,13 @@ from PyQt5 import QtCore
 plugin_path = os.path.join(os.path.dirname(QtCore.__file__), "plugins", "platforms")
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = plugin_path
 
+>>>>>>> origin/main
 
-# 현재 경로 기반으로 상위 폴더 추가
+# 경로 설정
+os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = r"C:\경로\plugins\platforms"
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
 sys.path.append(PARENT_DIR)
-
-
-# gui/main_window.py
-import random
-from datetime import datetime
-from PyQt5.QtWidgets import (
-    QApplication,
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton,
-    QLabel,
-    QFileDialog,
-    QTableWidget,
-    QTableWidgetItem,
-    QMessageBox,
-)
-
-from gui.history_window import HistoryWindow  # ← history 창 임포트
 
 
 class UploadWindow(QWidget):
@@ -41,10 +34,8 @@ class UploadWindow(QWidget):
         self.setWindowTitle("Drovis - 영상 분석")
         self.resize(1000, 600)
         self.file_path = None
-
-        self.history_window = None  # history 창 핸들
+        self.history_window = None
         self.username = username
-
         self.setup_ui()
 
     def setup_ui(self):
@@ -64,17 +55,15 @@ class UploadWindow(QWidget):
         self.analyze_btn.clicked.connect(self.start_analysis)
         layout.addWidget(self.analyze_btn)
 
-        # 기록 보기 버튼
+        # 분석 기록 보기
         self.history_btn = QPushButton("분석 기록 보기")
         self.history_btn.clicked.connect(self.open_history_window)
         layout.addWidget(self.history_btn)
 
-        # 분석 결과 테이블
+        # 결과 테이블
         self.result_table = QTableWidget()
         self.result_table.setColumnCount(4)
-        self.result_table.setHorizontalHeaderLabels(
-            ["파일명", "상태", "유사도 결과", "시간"]
-        )
+        self.result_table.setHorizontalHeaderLabels(["파일명", "상태", "유사도 결과", "시간"])
         self.result_table.setSortingEnabled(True)
         layout.addWidget(self.result_table)
 
@@ -93,72 +82,61 @@ class UploadWindow(QWidget):
             QMessageBox.warning(self, "경고", "먼저 영상을 업로드하세요.")
             return
 
-        similarity_score = round(random.uniform(0.3, 0.95), 2)
+        result_data = predict_from_video(self.file_path, self.username)
 
-        if similarity_score >= 0.8:
-            result = "상"
-        elif similarity_score >= 0.5:
-            result = "중"
-        else:
-            result = "하"
+        if not result_data["success"]:
+            QMessageBox.critical(self, "오류", result_data["message"])
+            return
 
+        result = result_data["result"]
+        filename = result_data["filename"]
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+        # 테이블에 결과 표시
         row = self.result_table.rowCount()
         self.result_table.insertRow(row)
-        self.result_table.setItem(
-            row, 0, QTableWidgetItem(os.path.basename(self.file_path))
-        )
+        self.result_table.setItem(row, 0, QTableWidgetItem(filename))
         self.result_table.setItem(row, 1, QTableWidgetItem("완료"))
         self.result_table.setItem(row, 2, QTableWidgetItem(result))
-        self.result_table.setItem(
-            row, 3, QTableWidgetItem(datetime.now().strftime("%Y-%m-%d %H:%M"))
-        )
+        self.result_table.setItem(row, 3, QTableWidgetItem(timestamp))
 
-        # 분석 기록 저장
+        # 기록 저장
         history_item = {
-            "filename": os.path.basename(self.file_path),
+            "filename": filename,
             "result": result,
-            "confidence": round(random.uniform(0.7, 0.99), 2),
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "description": "AI 자동 분석 결과",
+            "confidence": None,  # 추후 confidence 추가 시 여기에
+            "timestamp": timestamp,
+            "description": "AI 자동 분석 결과"
         }
 
         history_file = "data/history.json"
-        history = []
-
-        # 기존 기록 불러오기
-        if os.path.exists(history_file):
-            with open(history_file, "r", encoding="utf-8") as f:
-                try:
+        os.makedirs(os.path.dirname(history_file), exist_ok=True)
+        try:
+            if os.path.exists(history_file):
+                with open(history_file, "r", encoding="utf-8") as f:
                     history = json.load(f)
-                except json.JSONDecodeError:
-                    history = []
+            else:
+                history = []
+        except json.JSONDecodeError:
+            history = []
 
-        # 새 기록 추가
         history.append(history_item)
-
-        # 기록 저장
-        os.makedirs(os.path.dirname(history_file), exist_ok=True)  # 폴더 없으면 생성
         with open(history_file, "w", encoding="utf-8") as f:
             json.dump(history, f, ensure_ascii=False, indent=2)
 
     def open_history_window(self):
-        self.history_window = HistoryWindow(username=self.username)  # ← username 전달!
+        self.history_window = HistoryWindow(username=self.username)
         self.history_window.show()
 
 
-# 단독 실행용
-import os
-
 if __name__ == "__main__":
-    import sys
-    from PyQt5.QtWidgets import QApplication
-
     app = QApplication(sys.argv)
 
-    # 현재 스크립트 기준 절대 경로로 QSS 불러오기
+    # QSS 적용
     qss_path = os.path.join(os.path.dirname(__file__), "styles.qss")
-    with open(qss_path, "r", encoding="utf-8") as f:
-        app.setStyleSheet(f.read())
+    if os.path.exists(qss_path):
+        with open(qss_path, "r", encoding="utf-8") as f:
+            app.setStyleSheet(f.read())
 
     window = UploadWindow()
     window.show()

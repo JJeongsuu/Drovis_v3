@@ -17,7 +17,7 @@ class RegisterWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("회원가입")
-        self.setFixedSize(350, 400)
+        self.setFixedSize(1200, 1000)
 
         layout = QVBoxLayout()
 
@@ -44,14 +44,16 @@ class RegisterWindow(QWidget):
         self.pw2_input = QLineEdit()
         self.pw2_input.setPlaceholderText("비밀번호 다시 입력")
         self.pw2_input.setEchoMode(QLineEdit.Password)
+        self.pw2_input.returnPressed.connect(self.handle_register)
         layout.addWidget(QLabel("비밀번호 확인"))
         layout.addWidget(self.pw2_input)
 
         # 사용자 역할 선택
+        '''
         self.role_box = QComboBox()
         self.role_box.addItems(["일반 사용자", "경찰", "관리자"])
         layout.addWidget(QLabel("사용자 유형"))
-        layout.addWidget(self.role_box)
+        layout.addWidget(self.role_box) '''
 
         # 가입 버튼
         self.register_btn = QPushButton("가입하기")
@@ -65,7 +67,7 @@ class RegisterWindow(QWidget):
         email = self.email_input.text().strip()
         pw1 = self.pw_input.text()
         pw2 = self.pw2_input.text()
-        role_map = {"일반 사용자": "user", "경찰": "police", "관리자": "admin"}
+        # role_map = {"일반 사용자": "user", "경찰": "police", "관리자": "admin"} 
         role = role_map.get(self.role_box.currentText(), "user")
 
         if not username or not email or not pw1 or not pw2:
