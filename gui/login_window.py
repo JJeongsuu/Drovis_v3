@@ -27,6 +27,7 @@ from PyQt5.QtWidgets import (
     QApplication,
 )
 
+
 # ✅ 로그인 창 클래스
 class LoginWindow(QMainWindow):
     def __init__(self):
@@ -69,7 +70,9 @@ class LoginWindow(QMainWindow):
             self.upload.show()
             self.close()
         else:
-            QMessageBox.warning(self, "로그인 실패", "아이디 또는 비밀번호가 틀렸습니다.")
+            QMessageBox.warning(
+                self, "로그인 실패", "아이디 또는 비밀번호가 틀렸습니다."
+            )
 
 
 # ✅ 실행 진입점
