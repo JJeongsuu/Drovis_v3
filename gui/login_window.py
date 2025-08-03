@@ -27,12 +27,8 @@ from PyQt5.QtWidgets import (
     QApplication,
 )
 
-<<<<<<< HEAD
 
-# ✅ 로그인 창 클래스
-=======
 # 로그인 창 클래스
->>>>>>> origin/main
 class LoginWindow(QMainWindow):
     def __init__(self):
         super().__init__()
