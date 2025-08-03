@@ -13,9 +13,13 @@ from PyQt5.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QMessageBox,
+    QProgressBar,
+    QDialog,
 )
+from PyQt5.QtCore import Qt, QTimer
 from gui.history_window import HistoryWindow
 from core.services.predict import predict_from_video
+
 
 # 경로 설정
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = r"C:\경로\plugins\platforms"
@@ -32,7 +36,43 @@ class UploadWindow(QWidget):
         self.file_path = None
         self.history_window = None
         self.username = username
+        self.loading_dialog = None  # 분석중 다이얼로그 핸들
+        self.progress_timer = None  # 게이지 애니메이션용 타이머
+        self.progress_value = 0  # 게이지 현재 값
         self.setup_ui()
+
+    def show_loading_dialog(self, message="분석 중입니다..."):
+        # QDialog로 로딩창 생성
+        self.loading_dialog = QDialog(self)
+        self.loading_dialog.setWindowTitle("예측 진행 중")
+        self.loading_dialog.setModal(True)
+        self.loading_dialog.setFixedSize(300, 100)
+
+        layout = QVBoxLayout()
+        self.loading_label = QLabel(message)
+        self.loading_label.setAlignment(Qt.AlignCenter)
+
+        self.loading_bar = QProgressBar()
+        self.loading_bar.setRange(0, 100)  # 0~100% 진행
+        self.loading_bar.setValue(0)  # 초기값 0%
+
+        layout.addWidget(self.loading_label)
+        layout.addWidget(self.loading_bar)
+        self.loading_dialog.setLayout(layout)
+        self.loading_dialog.show()
+
+        # 진행률 타이머 시작
+        self.progress_value = 0
+        self.progress_timer = QTimer()
+        self.progress_timer.timeout.connect(lambda: self.update_progress(estimated_ms))
+        self.progress_timer.start(estimated_ms // 100)
+
+    def update_progress(self, estimated_ms):
+        if self.progress_value < 100:
+            self.progress_value += 1
+            self.loading_bar.setValue(self.progress_value)
+        else:
+            self.progress_timer.stop()
 
     def setup_ui(self):
         layout = QVBoxLayout()
@@ -67,22 +107,26 @@ class UploadWindow(QWidget):
 
         self.setLayout(layout)
 
-    def upload_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "영상 선택", "", "Video Files (*.mp4 *.avi *.mov)"
-        )
-        if file_path:
-            self.file_path = file_path
-            self.file_label.setText(os.path.basename(file_path))
-
+    # ============================================================
+    # 분석 버튼 클릭 시 UI 흐름:
+    # 1. 분석 중이면: 무한 게이지바 + '분석 중입니다...' 메시지 표시
+    # 2. 분석 끝나면: 게이지바 100% + '분석 결과: 상' 형식 표시
+    # ============================================================
     def start_analysis(self):
         if not self.file_path:
             QMessageBox.warning(self, "경고", "먼저 영상을 업로드하세요.")
             return
 
+        # 분석 중 다이얼로그 띄우기 (예상 시간 4초 기준)
+        self.show_loading_dialog("AI 분석 중입니다...", estimated_ms=4000)
+
+        # 실제 분석 실행
         result_data = predict_from_video(self.file_path, self.username)
 
+        # 분석 종료 → 로딩창 닫기
         if not result_data["success"]:
+            if self.loading_dialog:
+                self.loading_dialog.close()
             QMessageBox.critical(self, "오류", result_data["message"])
             return
 
@@ -90,7 +134,15 @@ class UploadWindow(QWidget):
         filename = result_data["filename"]
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-        # 테이블에 결과 표시
+        # 분석 결과 반영 (게이지바 100%로 설정 + 텍스트 변경)
+        if self.loading_dialog:
+            self.loading_label.setText(f"분석 결과: {result}")
+            self.loading_bar.setRange(0, 100)
+            self.loading_bar.setValue(100)
+            QApplication.processEvents()
+            QTimer.singleShot(1200, self.loading_dialog.close)  # 1.2초 후 자동 닫힘
+
+        # 결과 테이블에 결과 표시
         row = self.result_table.rowCount()
         self.result_table.insertRow(row)
         self.result_table.setItem(row, 0, QTableWidgetItem(filename))
@@ -121,6 +173,14 @@ class UploadWindow(QWidget):
         history.append(history_item)
         with open(history_file, "w", encoding="utf-8") as f:
             json.dump(history, f, ensure_ascii=False, indent=2)
+
+    def upload_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "영상 선택", "", "Video Files (*.mp4 *.avi *.mov)"
+        )
+        if file_path:
+            self.file_path = file_path
+            self.file_label.setText(os.path.basename(file_path))
 
     def open_history_window(self):
         self.history_window = HistoryWindow(username=self.username)
