@@ -41,7 +41,7 @@ class UploadWindow(QWidget):
         self.progress_value = 0  # 게이지 현재 값
         self.setup_ui()
 
-    def show_loading_dialog(self, message="분석 중입니다..."):
+    def show_loading_dialog(self, message="분석 중입니다...", estimated_ms=4000):
         # QDialog로 로딩창 생성
         self.loading_dialog = QDialog(self)
         self.loading_dialog.setWindowTitle("예측 진행 중")
@@ -124,55 +124,57 @@ class UploadWindow(QWidget):
         result_data = predict_from_video(self.file_path, self.username)
 
         # 분석 종료 → 로딩창 닫기
-        if not result_data["success"]:
-            if self.loading_dialog:
+        def run_prediction_after_progress():
+            result_data = predict_from_video(self.file_path, self.username)
+
+            if not result_data["success"]:
                 self.loading_dialog.close()
-            QMessageBox.critical(self, "오류", result_data["message"])
-            return
+                QMessageBox.critical(self, "오류", result_data["message"])
+                return
 
-        result = result_data["result"]
-        filename = result_data["filename"]
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+            result = result_data["result"]
+            filename = result_data["filename"]
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-        # 분석 결과 반영 (게이지바 100%로 설정 + 텍스트 변경)
-        if self.loading_dialog:
+            # 분석 결과 반영
             self.loading_label.setText(f"분석 결과: {result}")
-            self.loading_bar.setRange(0, 100)
-            self.loading_bar.setValue(100)
             QApplication.processEvents()
-            QTimer.singleShot(1200, self.loading_dialog.close)  # 1.2초 후 자동 닫힘
+            QTimer.singleShot(1200, self.loading_dialog.close)  # 결과 보여준 뒤 닫기
 
-        # 결과 테이블에 결과 표시
-        row = self.result_table.rowCount()
-        self.result_table.insertRow(row)
-        self.result_table.setItem(row, 0, QTableWidgetItem(filename))
-        self.result_table.setItem(row, 1, QTableWidgetItem("완료"))
-        self.result_table.setItem(row, 2, QTableWidgetItem(result))
-        self.result_table.setItem(row, 3, QTableWidgetItem(timestamp))
+            # 결과 테이블에 결과 표시
+            row = self.result_table.rowCount()
+            self.result_table.insertRow(row)
+            self.result_table.setItem(row, 0, QTableWidgetItem(filename))
+            self.result_table.setItem(row, 1, QTableWidgetItem("완료"))
+            self.result_table.setItem(row, 2, QTableWidgetItem(result))
+            self.result_table.setItem(row, 3, QTableWidgetItem(timestamp))
 
-        # 기록 저장
-        history_item = {
-            "filename": filename,
-            "result": result,
-            "confidence": None,  # 추후 confidence 추가 시 여기에
-            "timestamp": timestamp,
-            "description": "AI 자동 분석 결과",
-        }
+            # 기록 저장
+            history_item = {
+                "filename": filename,
+                "result": result,
+                "confidence": None,
+                "timestamp": timestamp,
+                "description": "AI 자동 분석 결과",
+            }
 
-        history_file = "data/history.json"
-        os.makedirs(os.path.dirname(history_file), exist_ok=True)
-        try:
-            if os.path.exists(history_file):
-                with open(history_file, "r", encoding="utf-8") as f:
-                    history = json.load(f)
-            else:
+            history_file = "data/history.json"
+            os.makedirs(os.path.dirname(history_file), exist_ok=True)
+            try:
+                if os.path.exists(history_file):
+                    with open(history_file, "r", encoding="utf-8") as f:
+                        history = json.load(f)
+                else:
+                    history = []
+            except json.JSONDecodeError:
                 history = []
-        except json.JSONDecodeError:
-            history = []
 
-        history.append(history_item)
-        with open(history_file, "w", encoding="utf-8") as f:
-            json.dump(history, f, ensure_ascii=False, indent=2)
+            history.append(history_item)
+            with open(history_file, "w", encoding="utf-8") as f:
+                json.dump(history, f, ensure_ascii=False, indent=2)
+
+        # 예측 실행을 게이지바 100% 완료 후로 연기 (예상 시간 기준)
+        QTimer.singleShot(4000, run_prediction_after_progress)
 
     def upload_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
