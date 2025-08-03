@@ -19,6 +19,7 @@ class HistoryWindow(QWidget):
         self.setWindowTitle("분석 기록")
         self.setGeometry(300, 200, 700, 500)
         self.history_file = history_file
+        self.username = username
 
         self.init_ui()
 
@@ -72,10 +73,18 @@ class HistoryWindow(QWidget):
         for row, item in enumerate(history):
             self.table.setItem(row, 0, QTableWidgetItem(item["filename"]))
             self.table.setItem(row, 1, self.make_colored_item(item["result"]))
-            self.table.setItem(
-                row, 2, QTableWidgetItem(f'{item["confidence"] * 100:.1f}%')
-            )
-            self.table.setItem(row, 3, QTableWidgetItem(item["timestamp"]))
+
+
+        # ✅ confidence 값이 None일 경우 대비
+        confidence = item.get("confidence")
+        if confidence is None:
+            confidence_str = "미제공"
+        else:
+            confidence_str = f"{confidence * 100:.1f}%"
+
+        self.table.setItem(row, 2, QTableWidgetItem(confidence_str))
+        self.table.setItem(row, 3, QTableWidgetItem(item["timestamp"]))
+
 
     def make_colored_item(self, level):
         item = QTableWidgetItem(level)
