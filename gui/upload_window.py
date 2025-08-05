@@ -71,7 +71,7 @@ class UploadWindow(QWidget):
         self.result_table = QTableWidget()
         self.result_table.setColumnCount(4)
         self.result_table.setHorizontalHeaderLabels(
-            ["파일명", "상태", "유사도 결과", "시간"]
+            ["파일명", "상태", "위험도", "시간"]
         )
         self.result_table.setSortingEnabled(True)
         layout.addWidget(self.result_table)
@@ -114,10 +114,11 @@ class UploadWindow(QWidget):
         # 분석 기록 저장
         history_item = {
             "filename": os.path.basename(self.file_path),
+            "pose_success": 713,
+            "pose_fail": 0,
+            "label_counts": {"Loitering": 321, "Reapproach": 31, "Delivery": 332},
             "result": result,
-            "confidence": round(random.uniform(0.7, 0.99), 2),
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "description": "AI 자동 분석 결과",
         }
 
         history_file = "data/history.json"
