@@ -72,6 +72,7 @@ class MainWindow(QMainWindow):
     def open_register_window(self):
         self.register_window = RegisterWindow()
         self.register_window.show()
+        self.close()
 
 
 # 단독 실행 시 진입점
