@@ -17,9 +17,8 @@ class HistoryWindow(QWidget):
     def __init__(self, username=None, history_file="data/history.json"):
         super().__init__()
         self.setWindowTitle("분석 기록")
-        self.setGeometry(300, 200, 900, 600)
+        self.setGeometry(300, 200, 700, 500)
         self.history_file = history_file
-        self.username = username
 
         self.init_ui()
 
@@ -30,22 +29,14 @@ class HistoryWindow(QWidget):
         title.setStyleSheet("font-size: 20px; font-weight: bold; margin-bottom: 15px;")
         layout.addWidget(title)
 
-        # ✅ 5열 테이블 구성
+        # 테이블 위젯 생성
         self.table = QTableWidget()
-        self.table.setColumnCount(5)
-        self.table.setHorizontalHeaderLabels(
-            [
-                "파일명",
-                "포즈 인식 성공",
-                "탐지 행동 비율\n(아래 내용은 예시임)",
-                "위험도",
-                "시간",
-            ]
-        )
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(["파일명", "위험도", "신뢰도", "날짜"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         layout.addWidget(self.table)
 
-        # 뒤로 가기 버튼
+        # 뒤로가기 버튼
         btn_back = QPushButton("뒤로 가기")
         btn_back.clicked.connect(self.go_back_to_upload)
         layout.addWidget(btn_back)
@@ -55,17 +46,18 @@ class HistoryWindow(QWidget):
         btn_logout.clicked.connect(self.logout_to_main)
         layout.addWidget(btn_logout)
 
-        # 닫기 버튼
+        # 버튼 영역
         btn_close = QPushButton("닫기")
         btn_close.clicked.connect(self.close)
-        layout.addWidget(btn_close)
 
-        # 기록 삭제 버튼
         btn_clear = QPushButton("기록 삭제")
         btn_clear.clicked.connect(self.clear_history)
+
+        layout.addWidget(btn_close)
         layout.addWidget(btn_clear)
 
         self.setLayout(layout)
+
         self.load_history()
 
     def load_history(self):
@@ -73,49 +65,27 @@ class HistoryWindow(QWidget):
             return
 
         with open(self.history_file, "r", encoding="utf-8") as f:
-            try:
-                history = json.load(f)
-            except json.JSONDecodeError:
-                history = []
+            history = json.load(f)
 
         self.table.setRowCount(len(history))
 
         for row, item in enumerate(history):
-            filename = item.get("filename", "")
-            result = item.get("result", "미정")
-            timestamp = item.get("timestamp", "")
-            pose_success = item.get("pose_success", 0)
-            pose_fail = item.get("pose_fail", 0)
-            label_counts = item.get("label_counts", {})
+            self.table.setItem(row, 0, QTableWidgetItem(item["filename"]))
+            self.table.setItem(row, 1, self.make_colored_item(item["result"]))
+            self.table.setItem(
+                row, 2, QTableWidgetItem(f'{item["confidence"] * 100:.1f}%')
+            )
+            self.table.setItem(row, 3, QTableWidgetItem(item["timestamp"]))
 
-            # 1. 파일명
-            self.table.setItem(row, 0, QTableWidgetItem(filename))
-
-            # 2. 포즈 인식 결과
-            pose_text = f"성공 : {pose_success}프레임\n실패 : {pose_fail}프레임"
-            self.table.setItem(row, 1, QTableWidgetItem(pose_text))
-
-            # 3. 탐지 행동 비율
-            label_text = ""
-            for label in ["Loitering", "Reapproach", "Delivery"]:
-                count = label_counts.get(label, 0)
-                total = sum(label_counts.values())
-                percent = (count / total * 100) if total > 0 else 0
-                label_text += f"- {label} : {count}회 ({percent:.2f}%)\n"
-            self.table.setItem(row, 2, QTableWidgetItem(label_text.strip()))
-
-            # 4. 위험도 (색상 포함)
-            risk_item = QTableWidgetItem(result)
-            if result == "상":
-                risk_item.setForeground(Qt.red)
-            elif result == "중":
-                risk_item.setForeground(Qt.darkYellow)
-            elif result == "하":
-                risk_item.setForeground(Qt.darkGreen)
-            self.table.setItem(row, 3, risk_item)
-
-            # 5. 분석 시간
-            self.table.setItem(row, 4, QTableWidgetItem(timestamp))
+    def make_colored_item(self, level):
+        item = QTableWidgetItem(level)
+        if level == "상":
+            item.setForeground(Qt.red)
+        elif level == "중":
+            item.setForeground(Qt.darkYellow)
+        elif level == "하":
+            item.setForeground(Qt.darkGreen)
+        return item
 
     def clear_history(self):
         reply = QMessageBox.question(
@@ -132,27 +102,25 @@ class HistoryWindow(QWidget):
             QMessageBox.information(self, "삭제됨", "기록이 삭제되었습니다.")
 
     def go_back_to_upload(self):
-        from gui.upload_window import UploadWindow  # 순환 import 방지
+        from gui.upload_window import UploadWindow  # 순환 import 방지용
 
         self.upload_window = UploadWindow(username=self.username)
         self.upload_window.show()
         self.close()
 
     def logout_to_main(self):
-        from gui.main_window import MainWindow
+        from gui.main_window import MainWindow  # 순환 import 방지용
 
         self.main_window = MainWindow()
         self.main_window.show()
         self.close()
-        self.deleteLater()
 
 
-# 단독 실행 시 테스트용
 if __name__ == "__main__":
     import sys
     from PyQt5.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
-    window = HistoryWindow()
+    window = HistoryWindow()  # ← 클래스 이름 맞게!
     window.show()
     sys.exit(app.exec_())
