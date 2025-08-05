@@ -127,14 +127,10 @@ class UploadWindow(QWidget):
         def run_prediction_after_progress():
             result_data = predict_from_video(self.file_path, self.username)
 
-        # 분석 기록 저장
-        history_item = {
-            "filename": os.path.basename(self.file_path),
-            "result": result,
-            "confidence": round(random.uniform(0.7, 0.99), 2),
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "description": "AI 자동 분석 결과",
-        }
+            if not result_data["success"]:
+                self.loading_dialog.close()
+                QMessageBox.critical(self, "오류", result_data["message"])
+                return
 
             result = result_data["result"]
             filename = result_data["filename"]
@@ -191,7 +187,6 @@ class UploadWindow(QWidget):
     def open_history_window(self):
         self.history_window = HistoryWindow(username=self.username)
         self.history_window.show()
-        self.hide()
 
 
 # 주석
