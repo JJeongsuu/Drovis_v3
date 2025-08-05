@@ -74,7 +74,6 @@ class HistoryWindow(QWidget):
             self.table.setItem(row, 0, QTableWidgetItem(item["filename"]))
             self.table.setItem(row, 1, self.make_colored_item(item["result"]))
 
-
         # ✅ confidence 값이 None일 경우 대비
         confidence = item.get("confidence")
         if confidence is None:
@@ -84,7 +83,6 @@ class HistoryWindow(QWidget):
 
         self.table.setItem(row, 2, QTableWidgetItem(confidence_str))
         self.table.setItem(row, 3, QTableWidgetItem(item["timestamp"]))
-
 
     def make_colored_item(self, level):
         item = QTableWidgetItem(level)
@@ -118,11 +116,12 @@ class HistoryWindow(QWidget):
         self.close()
 
     def logout_to_main(self):
-        from gui.main_window import MainWindow  # 순환 import 방지용
+        from gui.main_window import MainWindow
 
         self.main_window = MainWindow()
         self.main_window.show()
         self.close()
+        self.deleteLater()  # 객체 자체를 삭제 (메모리 해제)
 
 
 if __name__ == "__main__":
