@@ -65,13 +65,14 @@ class MainWindow(QMainWindow):
         self.register_window = None
 
     def open_login_window(self):
-        self.login_window = LoginWindow()
+        self.login_window = LoginWindow(parent=self)
         self.login_window.show()
-        self.close()
+        self.hide()
 
     def open_register_window(self):
-        self.register_window = RegisterWindow()
+        self.register_window = RegisterWindow(parent=self)
         self.register_window.show()
+        self.hide()
 
 
 # 단독 실행 시 진입점

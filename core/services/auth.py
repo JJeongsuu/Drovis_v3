@@ -4,14 +4,14 @@ import bcrypt
 from core.db import get_user_connection
 
 
-def register_user(username, password, email, role="user"):
+def register_user(username, password, email):
     conn = get_user_connection()
     cur = conn.cursor()
     hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
     try:
         cur.execute(
-            "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)",
-            (username, hashed_pw, email, role),
+            "INSERT INTO users (username, password, email) VALUES (?, ?, ?)",
+            (username, hashed_pw, email),
         )
         conn.commit()
         return True, "회원가입 성공"

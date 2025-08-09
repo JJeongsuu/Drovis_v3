@@ -9,15 +9,17 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QComboBox,
     QHBoxLayout,
+    
 )
 from core.services.auth import register_user
 
 
 class RegisterWindow(QWidget):
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
         self.setWindowTitle("회원가입")
         self.setFixedSize(1200, 1000)
+        self.parent_window = parent
 
         layout = QVBoxLayout()
 
@@ -60,6 +62,12 @@ class RegisterWindow(QWidget):
         self.register_btn.clicked.connect(self.handle_register)
         layout.addWidget(self.register_btn)
 
+        #뒤(main창)로 가기
+        self.back_btn = QPushButton("뒤로가기")
+        self.back_btn.clicked.connect(self.go_back)
+        layout.addWidget(self.back_btn)
+
+
         self.setLayout(layout)
 
     def handle_register(self):
@@ -88,6 +96,11 @@ class RegisterWindow(QWidget):
         else:
             QMessageBox.warning(self, "가입 실패", message)
 
+
+    def go_back(self):
+        self.close()
+        if self.parent_window:
+            self.parent_window.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
