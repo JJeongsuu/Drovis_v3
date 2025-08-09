@@ -2,9 +2,7 @@ Drovis_v3의 레포지토리입니다.
 
 # AI 기반 영상 분석을 활용한 범죄 수사 지원 프로그램: Drovis
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/JJeongsuu/Drovis_v3/ci.yml?branch=main)](https://github.com/JJeongsuu/Drovis_v3/actions)
 [![Python version](https://img.shields.io/badge/python-3.10-blue.svg)]()
-[![License](https://img.shields.io/github/license/JJeongsuu/Drovis_v3)](https://github.com/JJeongsuu/Drovis_v3/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/JJeongsuu/Drovis_v3)](https://github.com/JJeongsuu/Drovis_v3/issues)
 
 ## Drovis
