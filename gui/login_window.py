@@ -30,10 +30,11 @@ from PyQt5.QtWidgets import (
 
 # 로그인 창 클래스
 class LoginWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
         self.setWindowTitle("로그인")
         self.setFixedSize(600, 300)
+        self.parent_window = parent
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -55,6 +56,10 @@ class LoginWindow(QMainWindow):
         self.login_button.clicked.connect(self.try_login)
         layout.addWidget(self.login_button)
 
+        self.back_button = QPushButton("뒤로가기")
+        self.back_button.clicked.connect(self.go_back)
+        layout.addWidget(self.back_button)
+
         self.central_widget.setLayout(layout)
 
         self.upload = None  # 업로드 창 핸들
@@ -73,6 +78,11 @@ class LoginWindow(QMainWindow):
             QMessageBox.warning(
                 self, "로그인 실패", "아이디 또는 비밀번호가 틀렸습니다."
             )
+    
+    def go_back(self):
+        self.close()
+        if self.parent_window:
+            self.parent_window.show()
 
 
 # 실행 진입점
