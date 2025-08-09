@@ -19,8 +19,7 @@ class HistoryWindow(QWidget):
         self.setWindowTitle("분석 기록")
         self.setGeometry(300, 200, 700, 500)
         self.history_file = history_file
-        self.username = username
-
+        self.username = username  # ← 누락된 부분 보완
         self.init_ui()
 
     def init_ui(self):
@@ -47,18 +46,17 @@ class HistoryWindow(QWidget):
         btn_logout.clicked.connect(self.logout_to_main)
         layout.addWidget(btn_logout)
 
-        # 버튼 영역
+        # 닫기 버튼
         btn_close = QPushButton("닫기")
         btn_close.clicked.connect(self.close)
+        layout.addWidget(btn_close)
 
+        # 기록 삭제 버튼
         btn_clear = QPushButton("기록 삭제")
         btn_clear.clicked.connect(self.clear_history)
-
-        layout.addWidget(btn_close)
         layout.addWidget(btn_clear)
 
         self.setLayout(layout)
-
         self.load_history()
 
     def load_history(self):
@@ -66,25 +64,23 @@ class HistoryWindow(QWidget):
             return
 
         with open(self.history_file, "r", encoding="utf-8") as f:
-            history = json.load(f)
+            try:
+                history = json.load(f)
+            except json.JSONDecodeError:
+                history = []
 
         self.table.setRowCount(len(history))
 
         for row, item in enumerate(history):
             self.table.setItem(row, 0, QTableWidgetItem(item["filename"]))
             self.table.setItem(row, 1, self.make_colored_item(item["result"]))
-
-
-        # ✅ confidence 값이 None일 경우 대비
-        confidence = item.get("confidence")
-        if confidence is None:
-            confidence_str = "미제공"
-        else:
-            confidence_str = f"{confidence * 100:.1f}%"
-
-        self.table.setItem(row, 2, QTableWidgetItem(confidence_str))
-        self.table.setItem(row, 3, QTableWidgetItem(item["timestamp"]))
-
+            confidence = item.get("confidence")
+            if confidence is not None:
+                confidence_str = f"{confidence * 100:.1f}%"
+            else:
+                confidence_str = "-"
+            self.table.setItem(row, 2, QTableWidgetItem(confidence_str))
+            self.table.setItem(row, 3, QTableWidgetItem(item["timestamp"]))
 
     def make_colored_item(self, level):
         item = QTableWidgetItem(level)
@@ -111,14 +107,14 @@ class HistoryWindow(QWidget):
             QMessageBox.information(self, "삭제됨", "기록이 삭제되었습니다.")
 
     def go_back_to_upload(self):
-        from gui.upload_window import UploadWindow  # 순환 import 방지용
+        from gui.upload_window import UploadWindow  # 순환 import 방지
 
         self.upload_window = UploadWindow(username=self.username)
         self.upload_window.show()
         self.close()
 
     def logout_to_main(self):
-        from gui.main_window import MainWindow  # 순환 import 방지용
+        from gui.main_window import MainWindow  # 순환 import 방지
 
         self.main_window = MainWindow()
         self.main_window.show()
@@ -130,6 +126,6 @@ if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
-    window = HistoryWindow()  # ← 클래스 이름 맞게!
+    window = HistoryWindow()
     window.show()
     sys.exit(app.exec_())
