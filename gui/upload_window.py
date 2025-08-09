@@ -100,7 +100,7 @@ class UploadWindow(QWidget):
         self.result_table = QTableWidget()
         self.result_table.setColumnCount(4)
         self.result_table.setHorizontalHeaderLabels(
-            ["파일명", "상태", "유사도 결과", "시간"]
+            ["파일명", "상태", "위험도", "시간"]
         )
         self.result_table.setSortingEnabled(True)
         layout.addWidget(self.result_table)
@@ -151,12 +151,16 @@ class UploadWindow(QWidget):
 
             # 기록 저장
             history_item = {
-                "filename": filename,
-                "result": result,
+                "filename": result_data["filename"],
+                "result": result_data["result"],            # 위험도
+                "risk_level": result_data["result"],        # (옵션)
+                "pose_stats": result_data.get("pose_stats"),           # ✅
+                "behavior_counts": result_data.get("behavior_counts"), # ✅
+                "result_per_chunk": result_data.get("result_per_chunk"),
                 "confidence": None,
                 "timestamp": timestamp,
                 "description": "AI 자동 분석 결과",
-            }
+           }   
 
             history_file = "data/history.json"
             os.makedirs(os.path.dirname(history_file), exist_ok=True)
