@@ -1,8 +1,11 @@
 import os
 import sys
 
-# Qt 플랫폼 플러그인 경로 명시 (OneDrive + PyQt5 Qt5 구조)
-os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = r"C:\Users\김민경\OneDrive\바탕 화면\Proj_drovis\Drovis_v2-main\venv\Lib\site-packages\PyQt5\Qt5\plugins\platforms"
+# PyQt5 플랫폼 플러그인 경로 설정 (자동 방식 권장)
+from PyQt5 import QtCore  # QtCore 위치 기준으로 plugins 경로 자동 지정
+
+plugin_path = os.path.join(os.path.dirname(QtCore.__file__), "plugins", "platforms")
+os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = plugin_path
 
 # import 경로 처리 (상위 폴더를 sys.path에 추가)
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,8 +18,13 @@ from core.services.auth import verify_user
 
 # PyQt5 위젯 모듈들
 from PyQt5.QtWidgets import (
-    QMainWindow, QWidget, QLineEdit, QPushButton,
-    QVBoxLayout, QMessageBox, QApplication
+    QMainWindow,
+    QWidget,
+    QLineEdit,
+    QPushButton,
+    QVBoxLayout,
+    QMessageBox,
+    QApplication,
 )
 
 
@@ -34,11 +42,13 @@ class LoginWindow(QMainWindow):
 
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("아이디")
+        self.username_input.returnPressed.connect(self.try_login)
         layout.addWidget(self.username_input)
 
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("비밀번호")
         self.password_input.setEchoMode(QLineEdit.Password)
+        self.password_input.returnPressed.connect(self.try_login)
         layout.addWidget(self.password_input)
 
         self.login_button = QPushButton("로그인")
@@ -52,7 +62,7 @@ class LoginWindow(QMainWindow):
     def try_login(self):
         username = self.username_input.text()
         password = self.password_input.text()
-        
+
         is_valid, role = verify_user(username, password)
 
         if is_valid:
@@ -60,18 +70,10 @@ class LoginWindow(QMainWindow):
             self.upload.show()
             self.close()
         else:
-            QMessageBox.warning(self, "login failed", "Wrong id or password.")
+            QMessageBox.warning(
+                self, "로그인 실패", "아이디 또는 비밀번호가 틀렸습니다."
+            )
 
-        '''
-        # 간단한 인증 (실제로는 DB 또는 API 연동 가능)
-        if username == "admin" and password == "1234":
-            self.upload = UploadWindow(username)
-            self.upload.show()
-            self.close()
-        else:
-            QMessageBox.warning(self, "login failed", "Wrong id or password")
-
-        '''
 
 # 실행 진입점
 if __name__ == "__main__":
