@@ -100,7 +100,7 @@ class UploadWindow(QWidget):
         self.result_table = QTableWidget()
         self.result_table.setColumnCount(4)
         self.result_table.setHorizontalHeaderLabels(
-            ["파일명", "상태", "유사도 결과", "시간"]
+            ["파일명", "상태", "위험도", "시간"]
         )
         self.result_table.setSortingEnabled(True)
         layout.addWidget(self.result_table)
