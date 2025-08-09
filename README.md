@@ -32,18 +32,18 @@ In particular Drovis aims to:
 
 ### Windows 
 ```sh
-python3.10 -m venv venv310
-\venv310\Scripts\activate
-git clone https://github.com/JJeongsuu/Drovis_v3.git
-pip install -r requirements.txt
+$ python3.10 -m venv venv310
+$ \venv310\Scripts\activate
+$ git clone https://github.com/JJeongsuu/Drovis_v3.git
+$ pip install -r requirements.txt
 ```
 
 ### Mac / Linux
 ```sh
-python3.10 -m venv venv310
-source venv310/bin/activate
-git clone https://github.com/JJeongsuu/Drovis_v3.git
-pip install -r requirements.txt
+$ python3.10 -m venv venv310
+$ source venv310/bin/activate
+$ git clone https://github.com/JJeongsuu/Drovis_v3.git
+$ pip install -r requirements.txt
 ```
 
 ## Project Overview
@@ -55,7 +55,7 @@ pip install -r requirements.txt
 ### Detailed Design
 ```sh
 project-root/
-├── app.py                        # 앱 실행 진입점 
+├── app.py                        
 │
 ├── core/                         # 백엔드 로직
 │   ├── config.py                 # 환경 설정
