@@ -56,6 +56,7 @@ pip install -r requirements.txt
 ### 개발 목표 및 주요 내용
 
 ### 상세 설계
+```sh
 project-root/
 ├── app.py                        # 앱 실행 진입점 
 │
@@ -102,7 +103,7 @@ project-root/
 ├── requirements.txt              
 ├── README.md                     
 └── .gitignore                    
-
+```
 
 ### 시연 영상
 
