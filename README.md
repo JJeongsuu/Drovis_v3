@@ -1,6 +1,6 @@
 Drovis_v3의 레포지토리입니다.
 
-# Python Implementation of the Ethereum protocol
+# AI 기반 영상 분석을 활용한 범죄 수사 지원 프로그램: Drovis
 
 [![Join the conversation on Discord](https://img.shields.io/discord/809793915578089484?color=blue&label=chat&logo=discord&logoColor=white)](https://discord.gg/GHryRvPB84)
 [![Build Status](https://circleci.com/gh/ethereum/py-evm.svg?style=shield)](https://circleci.com/gh/ethereum/py-evm)
