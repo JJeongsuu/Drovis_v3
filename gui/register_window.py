@@ -93,6 +93,8 @@ class RegisterWindow(QWidget):
                 self, "가입 완료", f"{username}님, 가입을 환영합니다!"
             )
             self.close()
+            if self.parent_window:
+                self.parent_window.show()
         else:
             QMessageBox.warning(self, "가입 실패", message)
 
