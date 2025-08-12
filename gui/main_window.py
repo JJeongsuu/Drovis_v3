@@ -76,6 +76,7 @@ class MainWindow(QMainWindow):
 
         # 환영 문구 라벨
         welcome_label = QLabel("마약 드로퍼 탐지를 도와주는 Drovis입니다.")
+        welcome_label.setObjectName("welcomeLabel")  # QSS에서 지정할 이름
         # (1) 텍스트 중앙 정렬
         welcome_label.setAlignment(Qt.AlignCenter)
 
