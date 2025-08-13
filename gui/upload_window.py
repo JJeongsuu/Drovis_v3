@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QProgressBar,
     QDialog,
+    QHeaderView,
 )
 from PyQt5.QtCore import Qt, QTimer
 from gui.history_window import HistoryWindow
@@ -41,6 +42,7 @@ class UploadWindow(QWidget):
         self.progress_value = 0  # 게이지 현재 값
         self.setup_ui()
 
+    # ---------------- 로딩 다이얼로그 ----------------
     def show_loading_dialog(self, message="분석 중입니다...", estimated_ms=4000):
         # QDialog로 로딩창 생성
         self.loading_dialog = QDialog(self)
@@ -74,6 +76,7 @@ class UploadWindow(QWidget):
         else:
             self.progress_timer.stop()
 
+    # ---------------- UI 구성 ----------------
     def setup_ui(self):
         layout = QVBoxLayout()
 
@@ -102,7 +105,17 @@ class UploadWindow(QWidget):
         self.result_table.setHorizontalHeaderLabels(
             ["파일명", "상태", "위험도", "시간"]
         )
+
+        header = self.result_table.horizontalHeader()
+        for i in range(4):
+            header.setSectionResizeMode(i, QHeaderView.Stretch)  # ✅ 4개 칼럼 균등 분배
+
+        # 보기 옵션 (history와 동일한 느낌)
+        self.result_table.setWordWrap(True)  # ✅ 줄바꿈 허용
+        self.result_table.setTextElideMode(Qt.ElideNone)  # ✅ 말줄임 없이 모두 표시
+        self.result_table.verticalHeader().setDefaultSectionSize(36)  # ✅ 행 높이 통일
         self.result_table.setSortingEnabled(True)
+
         layout.addWidget(self.result_table)
 
         self.setLayout(layout)
@@ -152,15 +165,15 @@ class UploadWindow(QWidget):
             # 기록 저장
             history_item = {
                 "filename": result_data["filename"],
-                "result": result_data["result"],            # 위험도
-                "risk_level": result_data["result"],        # (옵션)
-                "pose_stats": result_data.get("pose_stats"),           # ✅
-                "behavior_counts": result_data.get("behavior_counts"), # ✅
+                "result": result_data["result"],  # 위험도
+                "risk_level": result_data["result"],  # (옵션)
+                "pose_stats": result_data.get("pose_stats"),  # ✅
+                "behavior_counts": result_data.get("behavior_counts"),  # ✅
                 "result_per_chunk": result_data.get("result_per_chunk"),
                 "confidence": None,
                 "timestamp": timestamp,
                 "description": "AI 자동 분석 결과",
-           }   
+            }
 
             history_file = "data/history.json"
             os.makedirs(os.path.dirname(history_file), exist_ok=True)
