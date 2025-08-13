@@ -7,9 +7,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QVBoxLayout,
     QMessageBox,
-    QComboBox,
     QHBoxLayout,
-    
 )
 from core.services.auth import register_user
 
@@ -50,23 +48,15 @@ class RegisterWindow(QWidget):
         layout.addWidget(QLabel("비밀번호 확인"))
         layout.addWidget(self.pw2_input)
 
-        # 사용자 역할 선택
-        '''
-        self.role_box = QComboBox()
-        self.role_box.addItems(["일반 사용자", "경찰", "관리자"])
-        layout.addWidget(QLabel("사용자 유형"))
-        layout.addWidget(self.role_box) '''
-
         # 가입 버튼
         self.register_btn = QPushButton("가입하기")
         self.register_btn.clicked.connect(self.handle_register)
         layout.addWidget(self.register_btn)
 
-        #뒤(main창)로 가기
+        # 뒤(main창)로 가기
         self.back_btn = QPushButton("뒤로가기")
         self.back_btn.clicked.connect(self.go_back)
         layout.addWidget(self.back_btn)
-
 
         self.setLayout(layout)
 
@@ -75,7 +65,7 @@ class RegisterWindow(QWidget):
         email = self.email_input.text().strip()
         pw1 = self.pw_input.text()
         pw2 = self.pw2_input.text()
-        # role_map = {"일반 사용자": "user", "경찰": "police", "관리자": "admin"} 
+        # role_map = {"일반 사용자": "user", "경찰": "police", "관리자": "admin"}
         # role = role_map.get(self.role_box.currentText(), "user")
 
         if not username or not email or not pw1 or not pw2:
@@ -98,11 +88,11 @@ class RegisterWindow(QWidget):
         else:
             QMessageBox.warning(self, "가입 실패", message)
 
-
     def go_back(self):
         self.close()
         if self.parent_window:
             self.parent_window.show()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

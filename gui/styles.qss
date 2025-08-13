@@ -109,19 +109,6 @@ QTableWidget::item:selected, QTableView::item:selected {
     color: #102943;
 }
 
-/**************************************************
- * 콤보박스 (QComboBox)
- * - 기본/포커스 상태 테두리 강조
- **************************************************/
-QComboBox {
-    border: 1.5px solid #ccd7e4;    
-    border-radius: 6px;
-    background: #fff;
-    padding: 7px 16px 7px 10px;
-}
-QComboBox:focus {
-    border: 1.5px solid #6db6fa;
-}
 
 /**************************************************
  * 스크롤바 (QScrollBar) — 수직
@@ -139,27 +126,6 @@ QScrollBar::handle:vertical {
 }
 QScrollBar::handle:vertical:hover {
     background: #90b8e6;
-}
-
-/**************************************************
- * 그룹박스 (QGroupBox)
- * - 카드 형태 느낌의 박스 + 제목 스타일
- **************************************************/
-QGroupBox {
-    border: 1.3px solid #b9cadb;
-    border-radius: 11px;
-    margin-top: 13px;
-    background: #fbfcfe;
-}
-QGroupBox:title {
-    subcontrol-origin: margin;
-    left: 14px;
-    top: -8px;
-    color: #4e81be;
-    background: transparent;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 1px 6px;
 }
 
 /**************************************************
