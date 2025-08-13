@@ -1,25 +1,18 @@
+# gui/history_window.py
 from PyQt5.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QLabel,
-    QPushButton,
-    QTableWidget,
-    QTableWidgetItem,
-    QHeaderView,
-    QMessageBox,
+    QWidget, QVBoxLayout, QLabel, QPushButton,
+    QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox
 )
 from PyQt5.QtCore import Qt
-import json
-import os
-
+import json, os
 
 class HistoryWindow(QWidget):
     def __init__(self, username=None, history_file="data/history.json"):
         super().__init__()
         self.setWindowTitle("분석 기록")
-        self.setGeometry(300, 200, 700, 500)
+        self.setGeometry(300, 200, 1000, 600)
         self.history_file = history_file
-        self.username = username  # ← 누락된 부분 보완
+        self.username = username
         self.init_ui()
 
     def init_ui(self):
@@ -29,29 +22,39 @@ class HistoryWindow(QWidget):
         title.setStyleSheet("font-size: 20px; font-weight: bold; margin-bottom: 15px;")
         layout.addWidget(title)
 
-        # 테이블 위젯 생성
+        # --- 테이블 설정 (메서드 안에서!) ---
         self.table = QTableWidget()
-        self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(["파일명", "위험도", "신뢰도", "날짜"])
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.setColumnCount(5)
+        self.table.setHorizontalHeaderLabels(
+            ["파일명", "포즈 인식 성공", "탐지 행동 비율", "위험도", "시간"]
+        )
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Stretch)           # 파일명
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)  # 포즈 인식 성공
+        header.setSectionResizeMode(2, QHeaderView.Stretch)           # 행동 비율(멀티라인)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)  # 위험도
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)  # 시간
+
+        self.table.setWordWrap(True)
+        self.table.setTextElideMode(Qt.ElideNone)
+        self.table.setSortingEnabled(True)
+        self.table.verticalHeader().setDefaultSectionSize(72)
+
         layout.addWidget(self.table)
 
-        # 뒤로가기 버튼
+        # 버튼들
         btn_back = QPushButton("뒤로 가기")
         btn_back.clicked.connect(self.go_back_to_upload)
         layout.addWidget(btn_back)
 
-        # 로그아웃 버튼
         btn_logout = QPushButton("로그아웃")
         btn_logout.clicked.connect(self.logout_to_main)
         layout.addWidget(btn_logout)
 
-        # 닫기 버튼
         btn_close = QPushButton("닫기")
         btn_close.clicked.connect(self.close)
         layout.addWidget(btn_close)
 
-        # 기록 삭제 버튼
         btn_clear = QPushButton("기록 삭제")
         btn_clear.clicked.connect(self.clear_history)
         layout.addWidget(btn_clear)
@@ -59,46 +62,73 @@ class HistoryWindow(QWidget):
         self.setLayout(layout)
         self.load_history()
 
+    # ---------- 보조 ----------
+    def make_ro_item(self, text, align_left=True):
+        it = QTableWidgetItem(text)
+        it.setFlags(it.flags() ^ Qt.ItemIsEditable)
+        it.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter if align_left else Qt.AlignCenter)
+        return it
+
+    def format_pose_text(self, pose_stats):
+        # pose_stats 예: {"success":713, "fail":0}
+        if not isinstance(pose_stats, dict):
+            return "-"
+        ok = pose_stats.get("success", 0)
+        ng = pose_stats.get("fail", 0)
+        return f"성공: {ok}프레임\n실패: {ng}프레임"
+
+    def format_behavior_text(self, behavior_counts):
+        # behavior_counts 예: {"Loitering":321, "Reapproach":31, "Delivery":332}
+        if not isinstance(behavior_counts, dict) or not behavior_counts:
+            return "-"
+        total = sum(behavior_counts.values()) or 1
+        lines = []
+        for k, v in behavior_counts.items():
+            pct = v * 100.0 / total
+            lines.append(f"- {k} : {v}회 ({pct:.2f}%)")
+        return "\n".join(lines)
+
+    def make_colored_item(self, level):
+        it = QTableWidgetItem(str(level if level is not None else "-"))
+        it.setFlags(it.flags() ^ Qt.ItemIsEditable)
+        if level == "상":
+            it.setForeground(Qt.red)
+        elif level == "중":
+            it.setForeground(Qt.darkYellow)
+        elif level == "하":
+            it.setForeground(Qt.darkGreen)
+        it.setTextAlignment(Qt.AlignCenter)
+        return it
+
+    # ---------- 데이터 로드 ----------
     def load_history(self):
         if not os.path.exists(self.history_file):
             return
-
-        with open(self.history_file, "r", encoding="utf-8") as f:
-            try:
+        try:
+            with open(self.history_file, "r", encoding="utf-8") as f:
                 history = json.load(f)
-            except json.JSONDecodeError:
-                history = []
+        except json.JSONDecodeError:
+            history = []
 
         self.table.setRowCount(len(history))
-
         for row, item in enumerate(history):
-            self.table.setItem(row, 0, QTableWidgetItem(item["filename"]))
-            self.table.setItem(row, 1, self.make_colored_item(item["result"]))
-            confidence = item.get("confidence")
-            if confidence is not None:
-                confidence_str = f"{confidence * 100:.1f}%"
-            else:
-                confidence_str = "-"
-            self.table.setItem(row, 2, QTableWidgetItem(confidence_str))
-            self.table.setItem(row, 3, QTableWidgetItem(item["timestamp"]))
+            filename = item.get("filename", "-")
+            risk = item.get("risk_level", item.get("result", "-"))
+            pose_txt = self.format_pose_text(item.get("pose_stats"))
+            beh_txt  = self.format_behavior_text(item.get("behavior_counts"))
+            ts = item.get("timestamp", "-")
 
-    def make_colored_item(self, level):
-        item = QTableWidgetItem(level)
-        if level == "상":
-            item.setForeground(Qt.red)
-        elif level == "중":
-            item.setForeground(Qt.darkYellow)
-        elif level == "하":
-            item.setForeground(Qt.darkGreen)
-        return item
+            self.table.setItem(row, 0, self.make_ro_item(filename))
+            self.table.setItem(row, 1, self.make_ro_item(pose_txt))
+            self.table.setItem(row, 2, self.make_ro_item(beh_txt))
+            self.table.setItem(row, 3, self.make_colored_item(risk))
+            self.table.setItem(row, 4, self.make_ro_item(ts, align_left=False))
 
+    # ---------- 내비 ----------
     def clear_history(self):
         reply = QMessageBox.question(
-            self,
-            "기록 삭제",
-            "모든 분석 기록을 삭제할까요?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
+            self, "기록 삭제", "모든 분석 기록을 삭제할까요?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No,
         )
         if reply == QMessageBox.Yes:
             if os.path.exists(self.history_file):
@@ -108,24 +138,12 @@ class HistoryWindow(QWidget):
 
     def go_back_to_upload(self):
         from gui.upload_window import UploadWindow  # 순환 import 방지
-
         self.upload_window = UploadWindow(username=self.username)
         self.upload_window.show()
         self.close()
 
     def logout_to_main(self):
         from gui.main_window import MainWindow  # 순환 import 방지
-
         self.main_window = MainWindow()
         self.main_window.show()
         self.close()
-
-
-if __name__ == "__main__":
-    import sys
-    from PyQt5.QtWidgets import QApplication
-
-    app = QApplication(sys.argv)
-    window = HistoryWindow()
-    window.show()
-    sys.exit(app.exec_())
