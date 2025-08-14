@@ -24,9 +24,9 @@ def register_user(username, password, email):
 def verify_user(username, password):
     conn = get_user_connection()
     cur = conn.cursor()
-    cur.execute("SELECT password, role FROM users WHERE username = ?", (username,))
+    cur.execute("SELECT password FROM users WHERE username = ?", (username,))
     row = cur.fetchone()
     conn.close()
     if row and bcrypt.checkpw(password.encode(), row[0].encode()):
-        return True, row[1]
-    return False, None
+        return True
+    return False
