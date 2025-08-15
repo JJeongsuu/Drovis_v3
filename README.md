@@ -2,11 +2,8 @@ Drovis_v3의 레포지토리입니다.
 
 # AI 기반 영상 분석을 활용한 범죄 수사 지원 프로그램: Drovis
 
-[![Join the conversation on Discord](https://img.shields.io/discord/809793915578089484?color=blue&label=chat&logo=discord&logoColor=white)](https://discord.gg/GHryRvPB84)
-[![Build Status](https://circleci.com/gh/ethereum/py-evm.svg?style=shield)](https://circleci.com/gh/ethereum/py-evm)
-[![PyPI version](https://badge.fury.io/py/py-evm.svg)](https://badge.fury.io/py/py-evm)
-[![Python versions](https://img.shields.io/pypi/pyversions/py-evm.svg)](https://pypi.python.org/pypi/py-evm)
-[![Docs build](https://readthedocs.org/projects/py-evm/badge/?version=latest)](https://py-evm.readthedocs.io/en/latest/?badge=latest)
+[![Python version](https://img.shields.io/badge/python-3.10-blue.svg)]()
+[![GitHub issues](https://img.shields.io/github/issues/JJeongsuu/Drovis_v3)](https://github.com/JJeongsuu/Drovis_v3/issues)
 
 ## Drovis
 
@@ -35,30 +32,30 @@ In particular Drovis aims to:
 
 ### Windows 
 ```sh
-python3.10 -m venv venv310
-\venv310\Scripts\activate
-git clone https://github.com/JJeongsuu/Drovis_v3.git
-pip install -r requirements.txt
+$ python3.10 -m venv venv310
+$ \venv310\Scripts\activate
+$ git clone https://github.com/JJeongsuu/Drovis_v3.git
+$ pip install -r requirements.txt
 ```
 
 ### Mac / Linux
 ```sh
-python3.10 -m venv venv310
-source venv310/bin/activate
-git clone https://github.com/JJeongsuu/Drovis_v3.git
-pip install -r requirements.txt
+$ python3.10 -m venv venv310
+$ source venv310/bin/activate
+$ git clone https://github.com/JJeongsuu/Drovis_v3.git
+$ pip install -r requirements.txt
 ```
 
-## 프로젝트 소개
+## Project Overview
 
-### 개발배경 및 필요성
+### Background and Necessity
 
-### 개발 목표 및 주요 내용
+### Development Goals and Key Feautures
 
-### 상세 설계
+### Detailed Design
 ```sh
 project-root/
-├── app.py                        # 앱 실행 진입점 
+├── app.py                        
 │
 ├── core/                         # 백엔드 로직
 │   ├── config.py                 # 환경 설정
@@ -105,15 +102,14 @@ project-root/
 └── .gitignore                    
 ```
 
-### 시연 영상
+### Demonstration Video
 
 
 ## TEAM : 두뇌풀가동
 
 | 장은정 | 김민경 | 나정수 | 조효빈 | 
 |:-------:|:-------:|:-------:|:-------:|
-| 팀장 <br/> AI 개발 | 디자이너 <br/> 프론트엔드 개발 |<br/> 백엔드 개발 | <br/> 백엔드 개발 |
-
+| 팀장 <br/> AI 개발 | 백엔드 개발 <br/> 프론트엔드 개발 |백엔드 개발 <br/> 프론트엔드 개발 |백엔드 개발 <br/> 프론트엔드 개발 |
 ## Documentation
 
 [Get started in 5 minutes](https://py-evm.readthedocs.io/en/latest/guides/building_an_app_that_uses_pyevm.html)

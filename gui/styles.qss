@@ -1,21 +1,27 @@
-/* 배경 및 메인 폰트 */
+/* 전역 기본 설정: 모든 창의 배경/폰트/글자색/글자크기 */
 QMainWindow, QWidget {
-    background: #f5f7fa;
-    font-family: 'Segoe UI', '맑은 고딕', Arial, sans-serif;
-    color: #2e3440;
-    font-size: 15px;
+    background: #f5f7fa;                                     
+    font-family: 'Segoe UI', '맑은 고딕', Arial, sans-serif;    
+    color: #2e3440;                                           
+    font-size: 15px;                                            
 }
 
-/* 버튼 */
+/* 환영 문구 라벨: objectName='welcomeLabel'에만 적용 */
+QLabel#welcomeLabel {
+    font-size: 28px;         /* 환영 문구를 크게 */
+    font-weight: 700;        /* 더 굵게 */
+}
+
+/* 버튼: 메인, 로그인, 회원가입, 업로드, 히스토리 화면 공통 */
 QPushButton {
     background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                       stop:0 #eaf1ff, stop:1 #cae0fc);
-    color: #274d79;
-    border-radius: 7px;
-    padding: 10px 0;  /* 상하 여백만 적용 */
-    font-weight: bold;
-    border: 1.5px solid #b6cbdd;
-    min-width: 150px;  /* 👈 버튼 넓이 통일 */
+    color: #274d79;                  /* 본문 텍스트 색 */
+    border-radius: 7px;                /* 버튼 모서리 둥글게 */
+    padding: 10px 0;                   /* 상하 여백만 적용 */
+    font-weight: bold;                 /* 굵게 */
+    border: 1.5px solid #b6cbdd;     /* 파스텔 테두리 */
+    min-width: 150px;                  /* 버튼 넓이 통일 */
 }
 QPushButton:hover {
     background-color: #daeaff;
@@ -23,31 +29,30 @@ QPushButton:hover {
     border: 1.5px solid #8ab3e7;
 }
 QPushButton:pressed {
-    background-color: #b7cdf6;
+    background-color: #b7cdf6;      /* 눌렀을 때 색상 */
 }
 
-/* 입력창 */
+/* 입력창: QLineEdit, QPlainTextEdit, QTextEdit 공통 */
 QLineEdit, QPlainTextEdit, QTextEdit {
-    background: #fff;
-    border: 1.5px solid #dae4ee;
-    border-radius: 6px;
-    padding: 7px 12px;
-    color: #263346;
+    background: #fff;             /* 배경색 */
+    border: 1.5px solid #dae4ee;  /* 테두리 */
+    border-radius: 6px;             /* 모서리 둥글게 */
+    padding: 7px 12px;              /* 안쪽 여백 */
+    color: #263346;               /* 글자색 */
 }
 QLineEdit:focus, QPlainTextEdit:focus, QTextEdit:focus {
-    border: 1.5px solid #60aaff;
-    background: #f6fbff;
+    border: 1.5px solid #60aaff; /* 포커스 시 테두리 파란색 */
+    background: #f6fbff;         /* 포커스 시 배경색 파란색 */
 }
 
-/* 라벨 */
+/* 라벨 기본 스타일: 모든 QLabel에 적용 */
 QLabel {
-    color: #25415b;
-    font-size: 15px;  /* 👈 더 자연스러운 크기 */
-    font-weight: bold;
+    color: #25415b;     /* 라벨 색상 유지 */
+    font-size: 15px;      /* 크기 유지 */
+    font-weight: bold;    /* 굵게 유지 */
 }
 
-
-/* 테이블 */
+/* 테이블: QTableView / QTableWidget 공통 스타일 */
 QTableView {
     background: #fafdff;
     border: 1.3px solid #dbe3ef;
@@ -72,18 +77,8 @@ QTableWidget::item:selected, QTableView::item:selected {
     color: #102943;
 }
 
-/* 콤보박스 */
-QComboBox {
-    border: 1.5px solid #ccd7e4;
-    border-radius: 6px;
-    background: #fff;
-    padding: 7px 16px 7px 10px;
-}
-QComboBox:focus {
-    border: 1.5px solid #6db6fa;
-}
 
-/* 스크롤바 */
+/* 스크롤바(세로): 테이블, 텍스트 영역에 적용 */
 QScrollBar:vertical {
     border: none;
     background: #f3f7fa;
@@ -99,31 +94,13 @@ QScrollBar::handle:vertical:hover {
     background: #90b8e6;
 }
 
-/* 그룹박스 */
-QGroupBox {
-    border: 1.3px solid #b9cadb;
-    border-radius: 11px;
-    margin-top: 13px;
-    background: #fbfcfe;
-}
-QGroupBox:title {
-    subcontrol-origin: margin;
-    left: 14px;
-    top: -8px;
-    color: #4e81be;
-    background: transparent;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 1px 6px;
-}
-
-/* 메시지 박스 */
+/* 메시지 박스: 경고/정보 다이얼로그에 적용 */
 QMessageBox {
     background: #f9fbfe;
     font-size: 15px;
 }
 
-/* 비활성 위젯 */
+/* 비활성 위젯: setEnabled(False) 상태 */
 QWidget:disabled {
     color: #a6b3c5;
 }

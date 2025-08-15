@@ -68,7 +68,7 @@ class LoginWindow(QMainWindow):
         username = self.username_input.text()
         password = self.password_input.text()
 
-        is_valid, role = verify_user(username, password)
+        is_valid = verify_user(username, password)
 
         if is_valid:
             self.upload = UploadWindow(username)

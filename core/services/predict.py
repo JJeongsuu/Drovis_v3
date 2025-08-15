@@ -2,7 +2,8 @@ import os
 import numpy as np
 import torch
 from collections import Counter
-from core.services.save_analysis import save_analysis_result
+
+# 지우기 from core.services.save_analysis import save_analysis_result
 from core.services.preprocess import process_pose
 from core.config import Config
 from core.models.lstm_model import LSTMModel
@@ -48,7 +49,10 @@ def get_suspicion_level(label_counts: Counter) -> str:
 def predict_from_video(video_path: str, user_id: str) -> dict:
     # 0) 입력 체크
     if not os.path.isfile(video_path):
-        return {"success": False, "message": f"영상 파일이 존재하지 않습니다: {video_path}"}
+        return {
+            "success": False,
+            "message": f"영상 파일이 존재하지 않습니다: {video_path}",
+        }
 
     filename = os.path.basename(video_path)
     npy_name = os.path.splitext(filename)[0] + ".pipe_norm_padd.npy"
@@ -62,7 +66,12 @@ def predict_from_video(video_path: str, user_id: str) -> dict:
             sequence_array, pose_stats = proc_out
         else:
             sequence_array = proc_out
-            pose_stats = {"success": int(len(sequence_array)) if sequence_array is not None else 0, "fail": 0}
+            pose_stats = {
+                "success": (
+                    int(len(sequence_array)) if sequence_array is not None else 0
+                ),
+                "fail": 0,
+            }
 
         if sequence_array is None or len(sequence_array) == 0:
             return {"success": False, "message": "MediaPipe pose 변환 실패"}
@@ -88,15 +97,17 @@ def predict_from_video(video_path: str, user_id: str) -> dict:
 
         # 슬라이딩 윈도우 (window=30, step=15)
         def split_sequence(seq, window=30, step=15):
-            return [seq[i:i + window] for i in range(0, len(seq) - window + 1, step)]
+            return [seq[i : i + window] for i in range(0, len(seq) - window + 1, step)]
 
         chunks = split_sequence(sequence)
         predictions = []
 
         for chunk in chunks:
-            input_tensor = torch.tensor(chunk, dtype=torch.float32).unsqueeze(0).to(device)  # (1, 30, 66)
+            input_tensor = (
+                torch.tensor(chunk, dtype=torch.float32).unsqueeze(0).to(device)
+            )  # (1, 30, 66)
             with torch.no_grad():
-                output = model(input_tensor)                   # (1, num_classes)
+                output = model(input_tensor)  # (1, num_classes)
                 pred_label = int(torch.argmax(output, dim=1))  # 정수 라벨
                 predictions.append(pred_label)
 
@@ -109,7 +120,9 @@ def predict_from_video(video_path: str, user_id: str) -> dict:
         # 3-2) 행동 카운트 — 항상 0 포함(키 누락 방지)
         behavior_counts = {
             "Loitering": int(label_counts.get(1, 0)),
-            "Delivery":  int(label_counts.get(2, 0)),  # ← handover 아님! LABEL_MAP과 통일
+            "Delivery": int(
+                label_counts.get(2, 0)
+            ),  # ← handover 아님! LABEL_MAP과 통일
             "Reapproach": int(label_counts.get(3, 0)),
         }
 
@@ -118,7 +131,9 @@ def predict_from_video(video_path: str, user_id: str) -> dict:
 
         # 로그 (선택)
         total = sum(label_counts.values()) or 1
-        print(f"\n포즈 인식 성공: {pose_stats.get('success', 0)}프레임 / 실패: {pose_stats.get('fail', 0)}프레임")
+        print(
+            f"\n포즈 인식 성공: {pose_stats.get('success', 0)}프레임 / 실패: {pose_stats.get('fail', 0)}프레임"
+        )
         print("\n예측된 행동 라벨 비율:")
         for label in sorted(label_counts):
             name = LABEL_MAP.get(label, str(label))
@@ -126,26 +141,31 @@ def predict_from_video(video_path: str, user_id: str) -> dict:
             percent = (count / total) * 100
             print(f"- {name} (라벨 {label}): {count}회 ({percent:.2f}%)")
 
-        detected = [LABEL_MAP[l] for l in SUSPICIOUS_LABELS if label_counts.get(l, 0) > 0]
-        print(f"\n행동 탐지 결과 : {suspicion_level} ({', '.join(detected) if detected else '탐지 없음'})")
+        detected = [
+            LABEL_MAP[l] for l in SUSPICIOUS_LABELS if label_counts.get(l, 0) > 0
+        ]
+        print(
+            f"\n행동 탐지 결과 : {suspicion_level} ({', '.join(detected) if detected else '탐지 없음'})"
+        )
 
     except Exception as e:
         return {"success": False, "message": f"AI 예측 오류: {str(e)}"}
 
-    # 4) 결과 저장 (DB 등) — 실패해도 작동 계속
-    try:
-        save_analysis_result(user_id=user_id, filename=filename, result=suspicion_level)
-    except Exception as e:
-        print(f"[경고] DB 저장 오류: {e}")
+    # 지우기
+    #    # 4) 결과 저장 (DB 등) — 실패해도 작동 계속
+    #    try:
+    #        save_analysis_result(user_id=user_id, filename=filename, result=suspicion_level)
+    #    except Exception as e:
+    #        print(f"[경고] DB 저장 오류: {e}")
 
     # 5) 최종 반환(History에 필요한 필드 모두 포함)
     return {
         "success": True,
         "filename": filename,
-        "result": suspicion_level,                              # 위험도(상/중/하)
-        "pose_stats": pose_stats,                               # 포즈 인식 성공/실패
-        "behavior_counts": behavior_counts,                     # 탐지 행동 비율(0 포함)
-        "detected_actions": detected,                           # 참고용
+        "result": suspicion_level,  # 위험도(상/중/하)
+        "pose_stats": pose_stats,  # 포즈 인식 성공/실패
+        "behavior_counts": behavior_counts,  # 탐지 행동 비율(0 포함)
+        "detected_actions": detected,  # 참고용
         "result_per_chunk": [LABEL_MAP[p] for p in predictions],
         "npy_path": npy_path,
     }
