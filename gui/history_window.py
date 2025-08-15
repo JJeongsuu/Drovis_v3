@@ -10,7 +10,9 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 from PyQt5.QtCore import Qt
-import json, os
+
+# import json, os -> 0815 이제 삭제해도 됨 유틸로 한 번에 처리
+from core.services.history_json import load_all, delete_all
 
 
 class HistoryWindow(QWidget):
@@ -116,13 +118,14 @@ class HistoryWindow(QWidget):
 
     # 기록 데이터 로드
     def load_history(self):
-        if not os.path.exists(self.history_file):
-            return
-        try:
-            with open(self.history_file, "r", encoding="utf-8") as f:
-                history = json.load(f)
-        except json.JSONDecodeError:
-            history = []
+        history = load_all(self.username)  # 추가했고 아래 주석 삭제해야 함
+        # if not os.path.exists(self.history_file):
+        #    return
+        # try:
+        #    with open(self.history_file, "r", encoding="utf-8") as f:
+        #        history = json.load(f)
+        # except json.JSONDecodeError:
+        #    history = []
 
         self.table.setRowCount(len(history))
         for row, item in enumerate(history):
@@ -148,10 +151,13 @@ class HistoryWindow(QWidget):
             QMessageBox.No,
         )
         if reply == QMessageBox.Yes:
-            if os.path.exists(self.history_file):
-                os.remove(self.history_file)
+            deleted = delete_all(self.username)  # 추가했고 아래 주석 삭제해야 함
+            # if os.path.exists(self.history_file):
+            #    os.remove(self.history_file)
             self.table.setRowCount(0)
-            QMessageBox.information(self, "삭제됨", "기록이 삭제되었습니다.")
+            QMessageBox.information(
+                self, "삭제됨", f"{deleted}개 기록이 삭제되었습니다."
+            )
 
     # 업로드 창으로 돌아가기
     def go_back_to_upload(self):

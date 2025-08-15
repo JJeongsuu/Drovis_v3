@@ -1,11 +1,10 @@
-# core/services/auth.py
 import sqlite3
 import bcrypt
 from core.db import get_user_connection
 
-
+# 회원가입
 def register_user(username, password, email):
-    conn = get_user_connection()
+    conn = get_user_connection()     # DB 연결
     cur = conn.cursor()
     hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
     try:
@@ -20,13 +19,15 @@ def register_user(username, password, email):
     finally:
         conn.close()
 
-
+# 로그인 검증
 def verify_user(username, password):
-    conn = get_user_connection()
+    conn = get_user_connection()     # DB 연결
     cur = conn.cursor()
     cur.execute("SELECT password FROM users WHERE username = ?", (username,))
     row = cur.fetchone()
     conn.close()
+
+    # 입력된 비밀번호화 해시 비교
     if row and bcrypt.checkpw(password.encode(), row[0].encode()):
         return True
     return False
