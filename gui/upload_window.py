@@ -24,7 +24,7 @@ from core.services.history_json import append_record     # 0815 추가
 
 
 # 경로 설정
-os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = r"C:\경로\plugins\platforms"
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
 sys.path.append(PARENT_DIR)
