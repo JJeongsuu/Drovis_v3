@@ -1,6 +1,6 @@
 import os
 import sys
-import json
+# import json 이제 안 씀 appen_record로 정리
 from datetime import datetime
 from PyQt5.QtWidgets import (
     QApplication,
@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QTimer
 from gui.history_window import HistoryWindow
 from core.services.predict import predict_from_video
+from core.services.history_json import append_record     # 0815 추가
 
 
 # 경로 설정
@@ -133,16 +134,28 @@ class UploadWindow(QWidget):
         # 분석 중 다이얼로그 띄우기 (예상 시간 4초 기준)
         self.show_loading_dialog("AI 분석 중입니다...", estimated_ms=4000)
 
+        
         # 실제 분석 실행
-        result_data = predict_from_video(self.file_path, self.username)
+        #result_data = predict_from_video(self.file_path, self.username) -> 바로 밑 함수에서 이미 하고 있음 => 중복
+        
 
         # 분석 종료 → 로딩창 닫기
         def run_prediction_after_progress():
             result_data = predict_from_video(self.file_path, self.username)
 
-            if not result_data["success"]:
-                self.loading_dialog.close()
-                QMessageBox.critical(self, "오류", result_data["message"])
+            # 삭제해야 함
+            #if not result_data["success"]:
+            #    self.loading_dialog.close()
+            #    QMessageBox.critical(self, "오류", result_data["message"])
+            #    return
+            
+
+            if not result_data.get("success"):
+                if self.progress_timer:
+                    self.progress_timer.stop()
+                if self.loading_dialog:
+                    self.loading_dialog.close()
+                QMessageBox.critical(self, "오류", result_data.get("message", "분석 실패"))
                 return
 
             result = result_data["result"]
@@ -163,32 +176,34 @@ class UploadWindow(QWidget):
             self.result_table.setItem(row, 3, QTableWidgetItem(timestamp))
 
             # 기록 저장
-            history_item = {
+            append_record({
+                "username": self.username,
                 "filename": result_data["filename"],
                 "result": result_data["result"],  # 위험도
                 "risk_level": result_data["result"],  # (옵션)
-                "pose_stats": result_data.get("pose_stats"),  # ✅
-                "behavior_counts": result_data.get("behavior_counts"),  # ✅
+                "pose_stats": result_data.get("pose_stats"),
+                "behavior_counts": result_data.get("behavior_counts"),  
                 "result_per_chunk": result_data.get("result_per_chunk"),
                 "confidence": None,
                 "timestamp": timestamp,
                 "description": "AI 자동 분석 결과",
-            }
+            })
 
-            history_file = "data/history.json"
-            os.makedirs(os.path.dirname(history_file), exist_ok=True)
-            try:
-                if os.path.exists(history_file):
-                    with open(history_file, "r", encoding="utf-8") as f:
-                        history = json.load(f)
-                else:
-                    history = []
-            except json.JSONDecodeError:
-                history = []
+            #삭제 해야 함
+            #history_file = "data/history.json"
+            #os.makedirs(os.path.dirname(history_file), exist_ok=True)
+            #try:
+            #    if os.path.exists(history_file):
+            #        with open(history_file, "r", encoding="utf-8") as f:
+            #            history = json.load(f)
+            #    else:
+            #        history = []
+            #except json.JSONDecodeError:
+            #    history = []
 
-            history.append(history_item)
-            with open(history_file, "w", encoding="utf-8") as f:
-                json.dump(history, f, ensure_ascii=False, indent=2)
+            #history.append(history_item)
+            #with open(history_file, "w", encoding="utf-8") as f:
+            #    json.dump(history, f, ensure_ascii=False, indent=2)
 
         # 예측 실행을 게이지바 100% 완료 후로 연기 (예상 시간 기준)
         QTimer.singleShot(4000, run_prediction_after_progress)
