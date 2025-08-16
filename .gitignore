@@ -5,5 +5,5 @@ __pycache__/
 *.sqlite3
 .vscode/
 database/*.db
-# uploads 추후 추가
+uploads/
 venv310/
