@@ -1,5 +1,5 @@
 # app.py
-import sys, os
+import sys, os, ctypes
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
 from core.models import create_user_table, create_analysis_table
@@ -20,6 +20,13 @@ create_analysis_table()
 
 # 앱 실행
 if __name__ == "__main__":
+
+    # 윈도우에서 작업표시줄 그룹/아이콘을 이 앱용으로 분리
+    try:
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u"Drovis.App")
+    except Exception:
+        pass
+
     app = QApplication(sys.argv)
 
     # 아이콘: 반드시 창 생성 전에 전역으로 설정 + 절대경로
