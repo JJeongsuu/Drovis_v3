@@ -1,6 +1,5 @@
 import os
 import sys
-# import json 이제 안 씀 appen_record로 정리
 from datetime import datetime
 from PyQt5.QtWidgets import (
     QApplication,
@@ -20,17 +19,21 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QTimer
 from gui.history_window import HistoryWindow
 from core.services.predict import predict_from_video
-from core.services.history_json import append_record     # 0815 추가
+from core.services.history_json import append_record  # 0815 추가
 
 
 # 경로 설정
+
+# Qt 플러그인 경로 및 모듈 경로 설정
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = r"C:\경로\plugins\platforms"
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
 sys.path.append(PARENT_DIR)
 
 
 class UploadWindow(QWidget):
+    # 업로드 창 초기화
     def __init__(self, username="guest"):
         super().__init__()
         self.setWindowTitle("Drovis - 영상 분석")
@@ -43,7 +46,7 @@ class UploadWindow(QWidget):
         self.progress_value = 0  # 게이지 현재 값
         self.setup_ui()
 
-    # ---------------- 로딩 다이얼로그 ----------------
+    # 로딩 다이얼로그 표시
     def show_loading_dialog(self, message="분석 중입니다...", estimated_ms=4000):
         # QDialog로 로딩창 생성
         self.loading_dialog = QDialog(self)
@@ -51,6 +54,7 @@ class UploadWindow(QWidget):
         self.loading_dialog.setModal(True)
         self.loading_dialog.setFixedSize(300, 100)
 
+        # 레이아웃 및 위젯 설정
         layout = QVBoxLayout()
         self.loading_label = QLabel(message)
         self.loading_label.setAlignment(Qt.AlignCenter)
@@ -70,6 +74,7 @@ class UploadWindow(QWidget):
         self.progress_timer.timeout.connect(lambda: self.update_progress(estimated_ms))
         self.progress_timer.start(estimated_ms // 100)
 
+    # 로딩 다이얼로그 진행률 업데이트
     def update_progress(self, estimated_ms):
         if self.progress_value < 100:
             self.progress_value += 1
@@ -77,11 +82,11 @@ class UploadWindow(QWidget):
         else:
             self.progress_timer.stop()
 
-    # ---------------- UI 구성 ----------------
+    # UI 구성
     def setup_ui(self):
         layout = QVBoxLayout()
 
-        # 영상 업로드 영역
+        # 업로드 버튼 + 파일명 표시
         upload_layout = QHBoxLayout()
         self.upload_btn = QPushButton("영상 업로드")
         self.upload_btn.clicked.connect(self.upload_file)
@@ -95,7 +100,7 @@ class UploadWindow(QWidget):
         self.analyze_btn.clicked.connect(self.start_analysis)
         layout.addWidget(self.analyze_btn)
 
-        # 분석 기록 보기
+        # 분석 기록 보기 버튼
         self.history_btn = QPushButton("분석 기록 보기")
         self.history_btn.clicked.connect(self.open_history_window)
         layout.addWidget(self.history_btn)
@@ -106,68 +111,51 @@ class UploadWindow(QWidget):
         self.result_table.setHorizontalHeaderLabels(
             ["파일명", "상태", "위험도", "시간"]
         )
-
         header = self.result_table.horizontalHeader()
         for i in range(4):
-            header.setSectionResizeMode(i, QHeaderView.Stretch)  # ✅ 4개 칼럼 균등 분배
+            header.setSectionResizeMode(i, QHeaderView.Stretch)  # 칼럼 균등 분배
 
-        # 보기 옵션 (history와 동일한 느낌)
-        self.result_table.setWordWrap(True)  # ✅ 줄바꿈 허용
-        self.result_table.setTextElideMode(Qt.ElideNone)  # ✅ 말줄임 없이 모두 표시
-        self.result_table.verticalHeader().setDefaultSectionSize(36)  # ✅ 행 높이 통일
+        self.result_table.setWordWrap(True)
+        self.result_table.setTextElideMode(Qt.ElideNone)
+        self.result_table.verticalHeader().setDefaultSectionSize(36)
         self.result_table.setSortingEnabled(True)
 
         layout.addWidget(self.result_table)
-
         self.setLayout(layout)
 
-    # ============================================================
-    # 분석 버튼 클릭 시 UI 흐름:
-    # 1. 분석 중이면: 무한 게이지바 + '분석 중입니다...' 메시지 표시
-    # 2. 분석 끝나면: 게이지바 100% + '분석 결과: 상' 형식 표시
-    # ============================================================
+    # 분석 시작
     def start_analysis(self):
         if not self.file_path:
             QMessageBox.warning(self, "경고", "먼저 영상을 업로드하세요.")
             return
 
-        # 분석 중 다이얼로그 띄우기 (예상 시간 4초 기준)
+        # 분석 중 로딩창 표시
         self.show_loading_dialog("AI 분석 중입니다...", estimated_ms=4000)
 
-        
-        # 실제 분석 실행
-        #result_data = predict_from_video(self.file_path, self.username) -> 바로 밑 함수에서 이미 하고 있음 => 중복
-        
-
-        # 분석 종료 → 로딩창 닫기
+        # 게이지바 완료 후 예측 실행
         def run_prediction_after_progress():
             result_data = predict_from_video(self.file_path, self.username)
-
-            # 삭제해야 함
-            #if not result_data["success"]:
-            #    self.loading_dialog.close()
-            #    QMessageBox.critical(self, "오류", result_data["message"])
-            #    return
-            
 
             if not result_data.get("success"):
                 if self.progress_timer:
                     self.progress_timer.stop()
                 if self.loading_dialog:
                     self.loading_dialog.close()
-                QMessageBox.critical(self, "오류", result_data.get("message", "분석 실패"))
+                QMessageBox.critical(
+                    self, "오류", result_data.get("message", "분석 실패")
+                )
                 return
 
             result = result_data["result"]
             filename = result_data["filename"]
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-            # 분석 결과 반영
+            # 결과 표시
             self.loading_label.setText(f"분석 결과: {result}")
             QApplication.processEvents()
             QTimer.singleShot(1200, self.loading_dialog.close)  # 결과 보여준 뒤 닫기
 
-            # 결과 테이블에 결과 표시
+            # 결과 테이블에 결과 추가
             row = self.result_table.rowCount()
             self.result_table.insertRow(row)
             self.result_table.setItem(row, 0, QTableWidgetItem(filename))
@@ -176,38 +164,24 @@ class UploadWindow(QWidget):
             self.result_table.setItem(row, 3, QTableWidgetItem(timestamp))
 
             # 기록 저장
-            append_record({
-                "username": self.username,
-                "filename": result_data["filename"],
-                "result": result_data["result"],  # 위험도
-                "risk_level": result_data["result"],  # (옵션)
-                "pose_stats": result_data.get("pose_stats"),
-                "behavior_counts": result_data.get("behavior_counts"),  
-                "result_per_chunk": result_data.get("result_per_chunk"),
-                "confidence": None,
-                "timestamp": timestamp,
-                "description": "AI 자동 분석 결과",
-            })
+            append_record(
+                {
+                    "username": self.username,
+                    "filename": result_data["filename"],
+                    "result": result_data["result"],  # 위험도
+                    "risk_level": result_data["result"],  # (옵션)
+                    "pose_stats": result_data.get("pose_stats"),
+                    "behavior_counts": result_data.get("behavior_counts"),
+                    "result_per_chunk": result_data.get("result_per_chunk"),
+                    "confidence": None,
+                    "timestamp": timestamp,
+                    "description": "AI 자동 분석 결과",
+                }
+            )
 
-            #삭제 해야 함
-            #history_file = "data/history.json"
-            #os.makedirs(os.path.dirname(history_file), exist_ok=True)
-            #try:
-            #    if os.path.exists(history_file):
-            #        with open(history_file, "r", encoding="utf-8") as f:
-            #            history = json.load(f)
-            #    else:
-            #        history = []
-            #except json.JSONDecodeError:
-            #    history = []
-
-            #history.append(history_item)
-            #with open(history_file, "w", encoding="utf-8") as f:
-            #    json.dump(history, f, ensure_ascii=False, indent=2)
-
-        # 예측 실행을 게이지바 100% 완료 후로 연기 (예상 시간 기준)
         QTimer.singleShot(4000, run_prediction_after_progress)
 
+    # 파일 업로드
     def upload_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self, "영상 선택", "", "Video Files (*.mp4 *.avi *.mov)"
@@ -216,13 +190,14 @@ class UploadWindow(QWidget):
             self.file_path = file_path
             self.file_label.setText(os.path.basename(file_path))
 
+    # 분석 기록 창 열기
     def open_history_window(self):
         self.history_window = HistoryWindow(username=self.username)
         self.history_window.show()
         self.hide()
 
 
-# 주석
+# 독립 실행
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
