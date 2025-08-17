@@ -11,7 +11,6 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 
-# import json, os -> 0815 이제 삭제해도 됨 유틸로 한 번에 처리
 from core.services.history_json import load_all, delete_all
 
 
@@ -84,24 +83,38 @@ class HistoryWindow(QWidget):
 
     # 포즈 인식 성공/실패 텍스트 포맷
     def format_pose_text(self, pose_stats):
-        # pose_stats 예: {"success":713, "fail":0}
         if not isinstance(pose_stats, dict):
             return "-"
         ok = pose_stats.get("success", 0)
         ng = pose_stats.get("fail", 0)
         return f"성공: {ok}프레임\n실패: {ng}프레임"
 
-    # 탐지 행동 비율 텍스트 포맷
-    def format_behavior_text(self, behavior_counts):
-        # behavior_counts 예: {"Loitering":321, "Reapproach":31, "Delivery":332}
-        if not isinstance(behavior_counts, dict) or not behavior_counts:
+    # 탐지 행동 비율 텍스트 포맷 (터미널과 동일하게 출력)
+    def format_behavior_from_chunks(self, chunks):
+        """result_per_chunk 기반으로 터미널 DEBUG 로그와 동일 포맷 생성"""
+        if not isinstance(chunks, list) or not chunks:
             return "-"
-        total = sum(behavior_counts.values()) or 1
+
+        # 터미널 포맷과 동일한 라벨/순서/이름
+        order = ["Normal", "Loitering", "Handover", "Reapproach"]
+        label_idx = {"Normal": 0, "Loitering": 1, "Handover": 2, "Reapproach": 3}
+
+        # 카운트 집계
+        counts = {name: 0 for name in order}
+        for n in chunks:
+            if n in counts:
+                counts[n] += 1
+        total = sum(counts.values()) or 1
+
+        # 터미널은 Counter에 존재하는 라벨만 출력 -> 0회는 출력 안 함
         lines = []
-        for k, v in behavior_counts.items():
-            pct = v * 100.0 / total
-            lines.append(f"- {k} : {v}회 ({pct:.2f}%)")
-        return "\n".join(lines)
+        for name in order:
+            c = counts[name]
+            if c <= 0:
+                continue
+            pct = round(c * 100.0 / total, 2)
+            lines.append(f"- {name} (라벨 {label_idx[name]}): {c}회 ({pct:.2f}%)")
+        return "\n".join(lines) if lines else "-"
 
     # 위험도 셀 생성
     def make_colored_item(self, level):
@@ -118,21 +131,18 @@ class HistoryWindow(QWidget):
 
     # 기록 데이터 로드
     def load_history(self):
-        history = load_all(self.username)  # 추가했고 아래 주석 삭제해야 함
-        # if not os.path.exists(self.history_file):
-        #    return
-        # try:
-        #    with open(self.history_file, "r", encoding="utf-8") as f:
-        #        history = json.load(f)
-        # except json.JSONDecodeError:
-        #    history = []
+        history = load_all(self.username)
 
         self.table.setRowCount(len(history))
         for row, item in enumerate(history):
             filename = item.get("filename", "-")
             risk = item.get("risk_level", item.get("result", "-"))
             pose_txt = self.format_pose_text(item.get("pose_stats"))
-            beh_txt = self.format_behavior_text(item.get("behavior_counts"))
+
+            # 터미널과 동일: result_per_chunk로 계산/표시
+            chunks = item.get("result_per_chunk")
+            beh_txt = self.format_behavior_from_chunks(chunks)
+
             ts = item.get("timestamp", "-")
 
             self.table.setItem(row, 0, self.make_ro_item(filename))
