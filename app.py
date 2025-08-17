@@ -5,13 +5,17 @@ from PyQt5.QtGui import QIcon
 from core.models import create_user_table, create_analysis_table
 from gui.main_window import MainWindow, load_stylesheet
 
+
 def resource_path(*parts):
     # PyInstaller로 빌드해도 동작하도록 안전한 경로 생성
     base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base, *parts)
 
+
 # DB 폴더 자동 생성 (app.py가 있는 Drovis_v3 기준으로 절대경로 사용)
-DB_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "database"))
+DB_DIR = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "database")
+)
 os.makedirs(DB_DIR, exist_ok=True)
 
 # DB 테이블 생성
@@ -23,7 +27,7 @@ if __name__ == "__main__":
 
     # 윈도우에서 작업표시줄 그룹/아이콘을 이 앱용으로 분리
     try:
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u"Drovis.App")
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Drovis.App")
     except Exception:
         pass
 
