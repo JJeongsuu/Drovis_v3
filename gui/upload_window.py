@@ -181,11 +181,18 @@ class UploadWindow(QWidget):
     # 파일 업로드
     def upload_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "영상 선택", "", "Video Files (*.mp4 *.avi *.mov)"
+            self, "영상 선택", "", "Video Files (*.mp4)"
         )
-        if file_path:
-            self.file_path = file_path
-            self.file_label.setText(os.path.basename(file_path))
+        if not file_path:
+            return
+
+        # 다른 확장자가 들어오는 경우
+        if not file_path.lower().endswith(".mp4"):
+            QMessageBox.warning(self, "형식 오류", "mp4 파일만 업로드할 수 있습니다.")
+            return
+
+        self.file_path = file_path
+        self.file_label.setText(os.path.basename(file_path))
 
     # 분석 기록 창 열기
     def open_history_window(self):
