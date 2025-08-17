@@ -1,48 +1,52 @@
 import sys
 from PyQt5.QtWidgets import (
-    QApplication,
-    QWidget,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QVBoxLayout,
-    QMessageBox,
-    QHBoxLayout,
+    QApplication, QWidget, QLabel, QLineEdit, QPushButton,
+    QVBoxLayout, QMessageBox, QHBoxLayout
 )
-from core.services.auth import register_user
-
+# 핵심: 로컬 SMTP가 아니라 서버 API 호출로 변경
+from core.services import auth_client  # 새로 만든 auth_client.py 사용
 
 class RegisterWindow(QWidget):
-    # 회원가입 창 초기화
     def __init__(self, parent=None):
         super().__init__()
         self.setWindowTitle("회원가입")
         self.setFixedSize(1200, 1000)
         self.parent_window = parent
+        self._verified_token = None  # 이메일 인증 완료 후 받은 토큰 저장
 
-        # 메인 레이아웃
         layout = QVBoxLayout()
 
-        # 아이디 입력 필드
         self.id_input = QLineEdit()
         self.id_input.setPlaceholderText("아이디 입력 (예: user123)")
         layout.addWidget(QLabel("아이디"))
         layout.addWidget(self.id_input)
 
-        # 이메일 입력 필드
+        layout.addWidget(QLabel("이메일"))
+        email_row = QHBoxLayout()
         self.email_input = QLineEdit()
         self.email_input.setPlaceholderText("이메일 입력 (예: user@example.com)")
-        layout.addWidget(QLabel("이메일"))
-        layout.addWidget(self.email_input)
+        self.send_code_btn = QPushButton("인증코드 보내기")
+        self.send_code_btn.clicked.connect(self.send_verification_code)
+        email_row.addWidget(self.email_input)
+        email_row.addWidget(self.send_code_btn)
+        layout.addLayout(email_row)
 
-        # 비밀번호 입력 필드
+        code_row = QHBoxLayout()
+        self.code_input = QLineEdit()
+        self.code_input.setPlaceholderText("6자리 인증코드")
+        self.code_input.setMaxLength(6)
+        self.verify_btn = QPushButton("인증 확인")
+        self.verify_btn.clicked.connect(self.verify_code)
+        code_row.addWidget(self.code_input)
+        code_row.addWidget(self.verify_btn)
+        layout.addLayout(code_row)
+
         self.pw_input = QLineEdit()
         self.pw_input.setPlaceholderText("비밀번호 입력 (8자 이상)")
         self.pw_input.setEchoMode(QLineEdit.Password)
         layout.addWidget(QLabel("비밀번호"))
         layout.addWidget(self.pw_input)
 
-        # 비밀번호 확인 필드
         self.pw2_input = QLineEdit()
         self.pw2_input.setPlaceholderText("비밀번호 다시 입력")
         self.pw2_input.setEchoMode(QLineEdit.Password)
@@ -50,55 +54,74 @@ class RegisterWindow(QWidget):
         layout.addWidget(QLabel("비밀번호 확인"))
         layout.addWidget(self.pw2_input)
 
-        # 가입 버튼
         self.register_btn = QPushButton("가입하기")
         self.register_btn.clicked.connect(self.handle_register)
         layout.addWidget(self.register_btn)
 
-        # 뒤(main창)로 가기
         self.back_btn = QPushButton("뒤로가기")
         self.back_btn.clicked.connect(self.go_back)
         layout.addWidget(self.back_btn)
 
         self.setLayout(layout)
 
-    # 회원가입 처리 로직
+    # 여기부터 서버 호출
+    def send_verification_code(self):
+        email = self.email_input.text().strip()
+        if not email:
+            QMessageBox.warning(self, "입력 오류", "이메일을 입력해주세요.")
+            return
+        try:
+            auth_client.send_code(email)
+            QMessageBox.information(self, "전송 완료", "인증코드를 이메일로 보냈습니다. 5분 내에 입력해주세요.")
+        except Exception as e:
+            QMessageBox.critical(self, "전송 실패", f"코드 전송 실패: {e}")
+
+    def verify_code(self):
+        email = self.email_input.text().strip()
+        code = self.code_input.text().strip()
+        if not email or not code:
+            QMessageBox.warning(self, "입력 오류", "이메일과 인증코드를 입력해주세요.")
+            return
+        try:
+            token = auth_client.verify_code(email, code)
+            self._verified_token = token
+            QMessageBox.information(self, "인증 성공", "이메일 인증이 완료되었습니다.")
+        except Exception as e:
+            QMessageBox.warning(self, "인증 실패", f"{e}")
+
     def handle_register(self):
         username = self.id_input.text().strip()
         email = self.email_input.text().strip()
         pw1 = self.pw_input.text()
         pw2 = self.pw2_input.text()
 
-        # 필수 입력값 검증
         if not username or not email or not pw1 or not pw2:
             QMessageBox.warning(self, "입력 오류", "모든 항목을 입력해주세요.")
             return
-
-        # 비밀번호 일치 여부 확인
+        if len(pw1) < 8:
+            QMessageBox.warning(self, "비밀번호 오류", "비밀번호는 8자 이상이어야 합니다.")
+            return
         if pw1 != pw2:
             QMessageBox.warning(self, "비밀번호 오류", "비밀번호가 일치하지 않습니다.")
             return
+        if not self._verified_token:
+            QMessageBox.warning(self, "인증 필요", "이메일 인증을 완료한 뒤 가입할 수 있습니다.")
+            return
+        try:
+            ok = auth_client.register(username, email, pw1, self._verified_token)
+            if ok:
+                QMessageBox.information(self, "가입 완료", f"{username}님, 가입을 환영합니다!")
+                self.close()
+                if self.parent_window:
+                    self.parent_window.show()
+        except Exception as e:
+            QMessageBox.warning(self, "가입 실패", f"{e}")
 
-        # 회원가입 시도 (register_user 내부에서 bcrypt 해시 처리 및 중복 검사)
-        success, message = register_user(username, pw1, email)
-        if success:
-            QMessageBox.information(
-                self, "가입 완료", f"{username}님, 가입을 환영합니다!"
-            )
-            self.close()
-            if self.parent_window:
-                self.parent_window.show()
-        else:
-            QMessageBox.warning(self, "가입 실패", message)
-
-    # 뒤로가기
     def go_back(self):
         self.close()
         if self.parent_window:
             self.parent_window.show()
 
-
-# 독립 실행 시 테스트
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = RegisterWindow()
