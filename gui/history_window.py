@@ -50,6 +50,7 @@ class HistoryWindow(QWidget):
         self.table.setTextElideMode(Qt.ElideNone)  # 말줄임 해제
         self.table.setSortingEnabled(True)  # 정렬 가능
         self.table.verticalHeader().setDefaultSectionSize(72)  # 기본 행 높이 설정
+        self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         layout.addWidget(self.table)
 
         # 버튼들
@@ -91,7 +92,6 @@ class HistoryWindow(QWidget):
 
     # 탐지 행동 비율 텍스트 포맷 (터미널과 동일하게 출력)
     def format_behavior_from_chunks(self, chunks):
-        """result_per_chunk 기반으로 터미널 DEBUG 로그와 동일 포맷 생성"""
         if not isinstance(chunks, list) or not chunks:
             return "-"
 
@@ -150,6 +150,7 @@ class HistoryWindow(QWidget):
             self.table.setItem(row, 2, self.make_ro_item(beh_txt))
             self.table.setItem(row, 3, self.make_colored_item(risk))
             self.table.setItem(row, 4, self.make_ro_item(ts, align_left=False))
+            self.table.resizeRowToContents(row)
 
     # 기록 삭제 기능
     def clear_history(self):
