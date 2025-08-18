@@ -2,9 +2,7 @@ Drovis_v3의 레포지토리입니다.
 
 # AI 기반 영상 분석을 활용한 범죄 수사 지원 프로그램: Drovis
 
-#[![Build Status](https://img.shields.io/github/actions/workflow/status/JJeongsuu/Drovis_v3/ci.yml?branch=main)](https://github.com/JJeongsuu/Drovis_v3/actions)
 [![Python version](https://img.shields.io/badge/python-3.10-blue.svg)]()
-#[![License](https://img.shields.io/github/license/JJeongsuu/Drovis_v3)](https://github.com/JJeongsuu/Drovis_v3/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/JJeongsuu/Drovis_v3)](https://github.com/JJeongsuu/Drovis_v3/issues)
 
 ## Drovis
@@ -77,9 +75,9 @@ project-root/
 │       ├── auth.py               # 로그인/회원가입 처리
 │       ├── preprocess.py         # 영상 → npy 변환 
 │       ├── predict.py            # 위의 npy 받아서 AI 모델 로딩 및 예측
-│       ├── ~save_analysis.py      # 분석 결과 저장~
+│       ├── ~~save_analysis.py    # 분석 결과 저장~~
 │       ├── histroy_json.py       # 분석 기록 → JSON 
-│       └── ~history.py            # 분석 기록 조회~
+│       └── ~~history.py          # 분석 기록 조회~~
 │
 ├── gui/                          # 프론트엔드 UI (PyQt5)
 │   ├── login_window.py           # 로그인 창
