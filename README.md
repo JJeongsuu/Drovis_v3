@@ -1,5 +1,3 @@
-Drovis_v3의 레포지토리입니다.
-
 # AI 기반 영상 분석을 활용한 마약 범죄 수사 지원 프로그램: Drovis
 
 [![Python version](https://img.shields.io/badge/python-3.10-blue.svg)]()
@@ -118,3 +116,9 @@ project-root/
 ## Links
 
 https://colab.research.google.com/drive/1hRJyIzisMv9yFO7gY9Hn1yxDeAlRBNAY?usp=sharing
+
+## Prize
+
+Idea Award, KISIA Information Security Developer Hackathon, 2025 
+
+
