@@ -117,8 +117,5 @@ project-root/
 
 https://colab.research.google.com/drive/1hRJyIzisMv9yFO7gY9Hn1yxDeAlRBNAY?usp=sharing
 
-## Prize
-
-Idea Award, KISIA Information Security Developer Hackathon, 2025 
 
 
