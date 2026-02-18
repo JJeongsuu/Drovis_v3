@@ -105,7 +105,7 @@ project-root/
 ```
 
 ### Demonstration Video
-https://youtu.be/p8nFiIFDHr8
+https://youtu.be/p8nFiIFDHr8<br/>
 [![Video Label](http://img.youtube.com/vi/p8nFiIFDHr8/0.jpg)](https://youtu.be/p8nFiIFDHr8)
 
 ## TEAM : 두뇌풀가동
